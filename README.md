@@ -65,30 +65,24 @@ or if the fields are nested
 
 This may be convenient, but note that using accessors makes the expression about four times slower than just using a parameter (consult the benchmarks for more precise measurements on your system). If there are functions you want to use, it's faster (and probably cleaner) to define them as functions (see the Evaluate section). These approaches use no reflection, and are designed to be fast and clean.
 
-What operators and types does this support?
+Default Language
 --
 
 * Modifiers: `+` `-` `/` `*` `&` `|` `^` `**` `%` `>>` `<<`
 * Comparators: `>` `>=` `<` `<=` `==` `!=` `=~` `!~`
 * Logical ops: `||` `&&`
 * Numeric constants, as 64-bit floating point (`12345.678`)
-* String constants (single quotes: `'foobar'`)
-* Date constants (single quotes, using any permutation of RFC3339, ISO8601, ruby date, or unix date; date parsing is automatically tried with any string constant)
+* String constants (double quotes: `"foobar"`)
+* Date function 'Date(x)', using any permutation of RFC3339, ISO8601, ruby date, or unix date
 * Boolean constants: `true` `false`
 * Parenthesis to control order of evaluation `(` `)`
-* Arrays (anything separated by `,` within parenthesis: `(1, 2, 'foo')`)
+* Json Arrays : `[1, 2, "foo"]`
+* Json Objects : `{"a":1, "b":2, "c":"foo"}`
 * Prefixes: `!` `-` `~`
 * Ternary conditional: `?` `:`
 * Null coalescence: `??`
 
-See [MANUAL.md](https://github.com/Knetic/govaluate/blob/master/MANUAL.md) for exacting details on what types each operator supports.
-
-Types
---
-
-Some operators don't make sense when used with some types. For instance, what does it mean to get the modulo of a string? What happens if you check to see if two numbers are logically AND'ed together?
-
-Everyone has a different intuition about the answers to these questions. To prevent confusion, this library will _refuse to operate_ upon types for which there is not an unambiguous meaning for the operation. See [MANUAL.md](https://github.com/Knetic/govaluate/blob/master/MANUAL.md) for details about what operators are valid for which types.
+See [Godoc](https://godoc.org/github.com/PaesslerAG/gval/#Gval) for Language details.
 
 Performance
 --
