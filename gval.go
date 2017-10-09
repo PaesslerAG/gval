@@ -28,7 +28,7 @@ func Evaluate(expression string, parameter interface{}, opts ...Language) (inter
 	return v, nil
 }
 
-//Full is the union of Arithmetic, Bitmask, Text, PropositionalLogic
+//Full is the union of Arithmetic, Bitmask, Text, PropositionalLogic and Json
 func Full(extensions ...Language) Language {
 	if len(extensions) == 0 {
 		return full
@@ -68,6 +68,12 @@ func PropositionalLogic() Language {
 	return propositionalLogic
 }
 
+// Json contains json objects ({string:expression,...})
+// and json arrays ([expression, ...])
+func Json() Language {
+	return ljson
+}
+
 // Base contains equal (==) and not equal (!=), perantheses and general support for variables, constants and functions
 // Operator in: a in b is true iff value a is an element of array b
 // Operator ??: a ?? b returns a if a is not false or nil, otherwise n
@@ -77,7 +83,7 @@ func Base() Language {
 	return base
 }
 
-var full = NewLanguage(arithmetic, bitmask, text, propositionalLogic, object,
+var full = NewLanguage(arithmetic, bitmask, text, propositionalLogic, ljson,
 
 	//TODO following language parts should be moved to subpackages
 
@@ -165,7 +171,7 @@ var full = NewLanguage(arithmetic, bitmask, text, propositionalLogic, object,
 	}),
 )
 
-var object = NewLanguage(
+var ljson = NewLanguage(
 	PrefixExtension('[', func(p *Parser) (Evaluable, error) {
 		evals := []Evaluable{}
 		for {

@@ -280,3 +280,39 @@ func ExampleEvaluate_jsonpath() {
 	// Output
 	// 100
 }
+
+func ExampleLanguage() {
+	lang := gval.NewLanguage(gval.Json(), gval.Arithmetic(),
+		//pipe operator
+		gval.PostfixOperator("|", func(p *gval.Parser, pre gval.Evaluable) (gval.Evaluable, error) {
+			post, err := p.ParseExpression()
+			if err != nil {
+				return nil, err
+			}
+			return func(c context.Context, v interface{}) (interface{}, error) {
+				v, err := pre(c, v)
+				if err != nil {
+					return nil, err
+				}
+				return post(c, v)
+			}, nil
+		}))
+
+	eval, err := lang.NewEvaluable(`{"foobar": 50} | foobar + 100`)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	value, err := eval(context.Background(), nil)
+
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	fmt.Println(value)
+
+	// Output
+	// 150
+}
