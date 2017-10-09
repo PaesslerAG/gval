@@ -12,17 +12,17 @@ Evaluate
 
 Gval can evaluate expressions with parameters, arimethetic, logical and string operations:
 
-- [basic expression: 10 > 0](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_basic)
-- [parametrized expression: foo > 0](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_parameter)
-- [nested parametrized expression: foo.bar > 0](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_nestedParameter)
-- [arithmetic expression: (requests_made * requests_succeeded / 100) >= 90](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_arithmetic)
-- [string expression: http_response_body == "service is ok"](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_string)
-- [float64 expression: (mem_used / total_mem) * 100](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_float64)
+- basic expression: [10 > 0](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_basic)
+- parametrized expression: [foo > 0](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_parameter)
+- nested parametrized expression: [foo.bar > 0](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_nestedParameter)
+- arithmetic expression: [(requests_made * requests_succeeded / 100) >= 90](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_arithmetic)
+- string expression: [http_response_body == "service is ok"](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_string)
+- float64 expression: [(mem_used / total_mem) * 100](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_float64)
 
 It can be easily extended with custom functions or operators:
 
-- [custom date comparator: date(\`2014-01-02\`) > date(\`2014-01-01 23:59:59\`)](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_dateComparison)
-- [string length: strlen("someReallyLongInputString") <= 16](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_basic)
+- custom date comparator: [date(\`2014-01-02\`) > date(\`2014-01-01 23:59:59\`)](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_dateComparison)
+- string length: [strlen("someReallyLongInputString") <= 16](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_basic)
 
 
 You can parse Expressions once, and can re-use them multiple times. Parsing is the compute-intensive phase of the process, so if you intend to use the same expression with different parameters, just parse it once:
