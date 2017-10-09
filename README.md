@@ -21,7 +21,7 @@ Gval can evaluate expressions with parameters, arimethetic, logical and string o
 
 It can be easily extended with custom functions or operators:
 
-- [custom date comparator: date(`2014-01-02`) > date(`2014-01-01 23:59:59`)](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_dateComparison)
+- [custom date comparator: date(\`2014-01-02\`) > date(\`2014-01-01 23:59:59\`)](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_dateComparison)
 - [string length: strlen("someReallyLongInputString") <= 16](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_basic)
 
 
@@ -33,7 +33,7 @@ The normal Go-standard order of operators is respected. When writing an expressi
 
 Strings, numbers and booleans can be used like in go:
 
-- [(7 < "47" == true ? "hello world!\n\u263a") + ` more text`](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluable)
+- [(7 < "47" == true ? "hello world!\n\u263a") + \` more text\`](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluable)
 
 Maps and Arrays 
 --
