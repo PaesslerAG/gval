@@ -1,7 +1,9 @@
 package gval
 
 import (
+	"context"
 	"fmt"
+	"reflect"
 	"strconv"
 	"text/scanner"
 )
@@ -181,6 +183,121 @@ func (p *Parser) parseArguments() (args []Evaluable, err error) {
 		case ',':
 		default:
 			return nil, p.Expected("arguments", ')', ',')
+		}
+	}
+}
+
+func inArray(a, b interface{}) (interface{}, error) {
+	col, ok := b.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("expected type []interface{} for in operator but got %T", b)
+	}
+	for _, value := range col {
+		if reflect.DeepEqual(a, value) {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func parseIf(p *Parser, e Evaluable) (Evaluable, error) {
+	a, err := p.ParseExpression()
+	if err != nil {
+		return nil, err
+	}
+	b := p.Const(nil)
+	switch p.Scan() {
+	case ':':
+		b, err = p.ParseExpression()
+		if err != nil {
+			return nil, err
+		}
+	case scanner.EOF:
+	default:
+		return nil, p.Expected("<> ? <> : <>", ':', scanner.EOF)
+	}
+	return func(c context.Context, v interface{}) (interface{}, error) {
+		x, err := e(c, v)
+		if err != nil {
+			return nil, err
+		}
+		if x == false || x == nil {
+			return b(c, v)
+		}
+		return a(c, v)
+	}, nil
+}
+
+func parseJSONArray(p *Parser) (Evaluable, error) {
+	evals := []Evaluable{}
+	for {
+		switch p.Scan() {
+		default:
+			p.Camouflage("array", ',', ']')
+			eval, err := p.ParseExpression()
+			if err != nil {
+				return nil, err
+			}
+			evals = append(evals, eval)
+		case ',':
+		case ']':
+			return func(c context.Context, v interface{}) (interface{}, error) {
+				vs := make([]interface{}, len(evals))
+				for i, e := range evals {
+					eval, err := e(c, v)
+					if err != nil {
+						return nil, err
+					}
+					vs[i] = eval
+				}
+
+				return vs, nil
+			}, nil
+		}
+	}
+}
+
+func parseJSONObject(p *Parser) (Evaluable, error) {
+	type kv struct {
+		key   Evaluable
+		value Evaluable
+	}
+	evals := []kv{}
+	for {
+		switch p.Scan() {
+		default:
+			p.Camouflage("object", ',', '}')
+			key, err := p.ParseExpression()
+			if err != nil {
+				return nil, err
+			}
+			if p.Scan() != ':' {
+				if err != nil {
+					return nil, p.Expected("object", ':')
+				}
+			}
+			value, err := p.ParseExpression()
+			if err != nil {
+				return nil, err
+			}
+			evals = append(evals, kv{key, value})
+		case ',':
+		case '}':
+			return func(c context.Context, v interface{}) (interface{}, error) {
+				vs := map[string]interface{}{}
+				for _, e := range evals {
+					value, err := e.value(c, v)
+					if err != nil {
+						return nil, err
+					}
+					key, err := e.key.EvalString(c, v)
+					if err != nil {
+						return nil, err
+					}
+					vs[key] = value
+				}
+				return vs, nil
+			}, nil
 		}
 	}
 }

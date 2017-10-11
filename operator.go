@@ -51,7 +51,7 @@ func (s *stageStack) pop() stage {
 type infixBuilder func(a, b Evaluable) (Evaluable, error)
 
 func isSymbolOperation(r rune) bool { //TODO operators (and following prefixes) shouldn't be restricted by symbol set
-	return r > 0 && !strings.ContainsRune("{([,])}", r) && (unicode.IsSymbol(r) || unicode.IsPunct(r))
+	return r > 0 && !strings.ContainsRune("{([,:\"`])}", r) && (unicode.IsSymbol(r) || unicode.IsPunct(r))
 }
 
 func (op *infix) initiate(name string) {

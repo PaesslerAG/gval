@@ -19,10 +19,11 @@ func (e Evaluable) EvalInt(c context.Context, parameter interface{}) (int, error
 		return 0, err
 	}
 
-	if f, ok := convertToFloat(v); ok {
-		return int(f), nil
+	f, ok := convertToFloat(v)
+	if !ok {
+		return 0, fmt.Errorf("expected number but got %v (%T)", v, v)
 	}
-	return 0, fmt.Errorf("expected number but got %v (%T)", v, v)
+	return int(f), nil
 }
 
 //EvalFloat64 evaluates given parameter to an int
@@ -32,10 +33,25 @@ func (e Evaluable) EvalFloat64(c context.Context, parameter interface{}) (float6
 		return 0, err
 	}
 
-	if f, ok := convertToFloat(v); ok {
-		return f, nil
+	f, ok := convertToFloat(v)
+	if !ok {
+		return 0, fmt.Errorf("expected number but got %v (%T)", v, v)
 	}
-	return 0, fmt.Errorf("expected number but got %v (%T)", v, v)
+	return f, nil
+}
+
+//EvalBool evaluates given parameter to an bool
+func (e Evaluable) EvalBool(c context.Context, parameter interface{}) (bool, error) {
+	v, err := e(c, parameter)
+	if err != nil {
+		return false, err
+	}
+
+	b, ok := convertToBool(v)
+	if !ok {
+		return false, fmt.Errorf("expected bool but got %v (%T)", v, v)
+	}
+	return b, nil
 }
 
 //EvalString evaluates given parameter to an string

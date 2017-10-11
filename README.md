@@ -5,7 +5,7 @@ Gval
 [![Godoc](https://godoc.org/github.com/PaesslerAG/gval?status.png)](https://godoc.org/github.com/PaesslerAG/gval)
 
 
-Provides support for evaluating arbitrary expressions. In particular for Go-like expressions.
+Gval (Go EVALuate) provides support for evaluating arbitrary expressions. In particular for Go-like expressions.
 
 Evaluate
 --

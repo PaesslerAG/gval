@@ -28,7 +28,11 @@ func Evaluate(expression string, parameter interface{}, opts ...Language) (inter
 	return v, nil
 }
 
-//Full is the union of Arithmetic, Bitmask, Text, PropositionalLogic and Json
+// Full is the union of Arithmetic, Bitmask, Text, PropositionalLogic and Json
+// Operator in: a in b is true iff value a is an element of array b
+// Operator ??: a ?? b returns a if a is not false or nil, otherwise n
+// Operator ?: a ? b : c returns b if bool a is true, otherwise b
+// Function Date: Date(a) parses string a. a must match RFC3339, ISO8601, ruby date, or unix date
 func Full(extensions ...Language) Language {
 	if len(extensions) == 0 {
 		return full
@@ -36,7 +40,7 @@ func Full(extensions ...Language) Language {
 	return NewLanguage(append([]Language{full}, extensions...)...)
 }
 
-// Arithmetic contains numbers, plus(+), minus(-), divide(/), power(**), negative(-)
+// Arithmetic contains base, plus(+), minus(-), divide(/), power(**), negative(-)
 // and numerical order (<=,<,>,>=)
 // Arithmetic operators expect float64 operands.
 // Called with unfitting input they try to convert the input to float64.
@@ -45,7 +49,7 @@ func Arithmetic() Language {
 	return arithmetic
 }
 
-//Bitmask contains numbers, bitwise and(&), bitwise or(|), bitwise not(^),
+// Bitmask contains base, bitwise and(&), bitwise or(|), bitwise not(^),
 // Bitmask operators expect float64 operands.
 // Called with unfitting input they try to convert the input to float64.
 // They can parse strings and convert any type of int or float
@@ -53,13 +57,13 @@ func Bitmask() Language {
 	return bitmask
 }
 
-//Text contains support for string constants ("" or ``), char constants (''),
-//lexical order on strings (<=,<,>,>=), regex match (=~) and regex not match (!~)
+// Text contains base, lexical order on strings (<=,<,>,>=),
+// regex match (=~) and regex not match (!~)
 func Text() Language {
 	return text
 }
 
-// PropositionalLogic contains true, false, not(!), and (&&), or (||) and Base
+// PropositionalLogic contains base, not(!), and (&&), or (||) and Base
 // Propositional operator expect bool operands.
 // Called with unfitting input they try to convert the input to bool.
 // Numbers others then 0 and the strings "TRUE" and "true" are interpreted as true.
@@ -68,17 +72,14 @@ func PropositionalLogic() Language {
 	return propositionalLogic
 }
 
-// Json contains json objects ({string:expression,...})
+// JSON contains json objects ({string:expression,...})
 // and json arrays ([expression, ...])
-func Json() Language {
+func JSON() Language {
 	return ljson
 }
 
 // Base contains equal (==) and not equal (!=), perantheses and general support for variables, constants and functions
-// Operator in: a in b is true iff value a is an element of array b
-// Operator ??: a ?? b returns a if a is not false or nil, otherwise n
-// Operator ?: a ? b : c returns b if bool a is true, otherwise b
-// Function Date: Date(a) parses string a. a must match RFC3339, ISO8601, ruby date, or unix date
+// It contains true, false, (floating point) number, string  ("" or ``) and char ('') constants
 func Base() Language {
 	return base
 }
@@ -87,18 +88,7 @@ var full = NewLanguage(arithmetic, bitmask, text, propositionalLogic, ljson,
 
 	//TODO following language parts should be moved to subpackages
 
-	InfixOperator("in", func(a, b interface{}) (interface{}, error) {
-		col, ok := b.([]interface{})
-		if !ok {
-			return nil, fmt.Errorf("expected type []interface{} for in operator but got %T", b)
-		}
-		for _, value := range col {
-			if reflect.DeepEqual(a, value) {
-				return true, nil
-			}
-		}
-		return false, nil
-	}),
+	InfixOperator("in", inArray),
 
 	InfixShortCircuit("??", func(a interface{}) (interface{}, bool) {
 		return a, a != false && a != nil
@@ -110,33 +100,7 @@ var full = NewLanguage(arithmetic, bitmask, text, propositionalLogic, ljson,
 		return a, nil
 	}),
 
-	PostfixOperator("?", func(p *Parser, e Evaluable) (Evaluable, error) {
-		a, err := p.ParseExpression()
-		if err != nil {
-			return nil, err
-		}
-		b := p.Const(nil)
-		switch p.Scan() {
-		case ':':
-			b, err = p.ParseExpression()
-			if err != nil {
-				return nil, err
-			}
-		case scanner.EOF:
-		default:
-			return nil, p.Expected("<> ? <> : <>", ':', scanner.EOF)
-		}
-		return func(c context.Context, v interface{}) (interface{}, error) {
-			x, err := e(c, v)
-			if err != nil {
-				return nil, err
-			}
-			if x == false || x == nil {
-				return b(c, v)
-			}
-			return a(c, v)
-		}, nil
-	}),
+	PostfixOperator("?", parseIf),
 
 	Function("date", func(arguments ...interface{}) (interface{}, error) {
 		if len(arguments) != 1 {
@@ -172,91 +136,11 @@ var full = NewLanguage(arithmetic, bitmask, text, propositionalLogic, ljson,
 )
 
 var ljson = NewLanguage(
-	PrefixExtension('[', func(p *Parser) (Evaluable, error) {
-		evals := []Evaluable{}
-		for {
-			switch p.Scan() {
-			default:
-				p.Camouflage("array", ',', ']')
-				eval, err := p.ParseExpression()
-				if err != nil {
-					return nil, err
-				}
-				evals = append(evals, eval)
-			case ',':
-			case ']':
-				return func(c context.Context, v interface{}) (interface{}, error) {
-					vs := make([]interface{}, len(evals))
-					for i, e := range evals {
-						eval, err := e(c, v)
-						if err != nil {
-							return nil, err
-						}
-						vs[i] = eval
-					}
-
-					return vs, nil
-				}, nil
-			}
-		}
-	}),
-	PrefixExtension('{', func(p *Parser) (Evaluable, error) {
-		type kv struct {
-			key   Evaluable
-			value Evaluable
-		}
-		evals := []kv{}
-		for {
-			switch p.Scan() {
-			default:
-				p.Camouflage("object", ',', '}')
-				key, err := p.ParseExpression()
-				if err != nil {
-					return nil, err
-				}
-				if p.Scan() != ':' {
-					if err != nil {
-						return nil, p.Expected("object", ':')
-					}
-				}
-				value, err := p.ParseExpression()
-				if err != nil {
-					return nil, err
-				}
-				evals = append(evals, kv{key, value})
-			case ',':
-			case '}':
-				return func(c context.Context, v interface{}) (interface{}, error) {
-					vs := map[string]interface{}{}
-					for _, e := range evals {
-						value, err := e.value(c, v)
-						if err != nil {
-							return nil, err
-						}
-						key, err := e.key.EvalString(c, v)
-						if err != nil {
-							return nil, err
-						}
-						vs[key] = value
-					}
-					return vs, nil
-				}, nil
-			}
-		}
-	}),
+	PrefixExtension('[', parseJSONArray),
+	PrefixExtension('{', parseJSONObject),
 )
 
 var arithmetic = NewLanguage(
-	PrefixExtension(scanner.Int, parseNumber),
-	PrefixExtension(scanner.Float, parseNumber),
-	PrefixOperator("-", func(c context.Context, v interface{}) (interface{}, error) {
-		i, ok := convertToFloat(v)
-		if !ok {
-			return nil, fmt.Errorf("unexpected %T expected number", v)
-		}
-		return -i, nil
-	}),
-
 	InfixNumberOperator("+", func(a, b float64) (interface{}, error) { return a + b, nil }),
 	InfixNumberOperator("-", func(a, b float64) (interface{}, error) { return a - b, nil }),
 	InfixNumberOperator("*", func(a, b float64) (interface{}, error) { return a * b, nil }),
@@ -276,9 +160,6 @@ var arithmetic = NewLanguage(
 )
 
 var bitmask = NewLanguage(
-	PrefixExtension(scanner.Int, parseNumber),
-	PrefixExtension(scanner.Float, parseNumber),
-
 	InfixNumberOperator("^", func(a, b float64) (interface{}, error) { return float64(int64(a) ^ int64(b)), nil }),
 	InfixNumberOperator("&", func(a, b float64) (interface{}, error) { return float64(int64(a) & int64(b)), nil }),
 	InfixNumberOperator("|", func(a, b float64) (interface{}, error) { return float64(int64(a) | int64(b)), nil }),
@@ -295,9 +176,6 @@ var bitmask = NewLanguage(
 )
 
 var text = NewLanguage(
-	PrefixExtension(scanner.String, parseString),
-	PrefixExtension(scanner.Char, parseString),
-	PrefixExtension(scanner.RawString, parseString),
 	InfixTextOperator("+", func(a, b string) (interface{}, error) { return fmt.Sprintf("%v%v", a, b), nil }),
 
 	InfixTextOperator("<", func(a, b string) (interface{}, error) { return a < b, nil }),
@@ -311,8 +189,6 @@ var text = NewLanguage(
 )
 
 var propositionalLogic = NewLanguage(
-	Constant("true", true),
-	Constant("false", false),
 	PrefixOperator("!", func(c context.Context, v interface{}) (interface{}, error) {
 		b, ok := convertToBool(v)
 		if !ok {
@@ -333,6 +209,22 @@ var propositionalLogic = NewLanguage(
 )
 
 var base = NewLanguage(
+	PrefixExtension(scanner.Int, parseNumber),
+	PrefixExtension(scanner.Float, parseNumber),
+	PrefixOperator("-", func(c context.Context, v interface{}) (interface{}, error) {
+		i, ok := convertToFloat(v)
+		if !ok {
+			return nil, fmt.Errorf("unexpected %v(%T) expected number", v, v)
+		}
+		return -i, nil
+	}),
+
+	PrefixExtension(scanner.String, parseString),
+	PrefixExtension(scanner.Char, parseString),
+	PrefixExtension(scanner.RawString, parseString),
+
+	Constant("true", true),
+	Constant("false", false),
 
 	InfixOperator("==", func(a, b interface{}) (interface{}, error) { return reflect.DeepEqual(a, b), nil }),
 	InfixOperator("!=", func(a, b interface{}) (interface{}, error) { return !reflect.DeepEqual(a, b), nil }),
