@@ -61,11 +61,12 @@ func (l Language) Evaluate(expression string, parameter interface{}) (interface{
 	return eval(context.Background(), parameter)
 }
 
-// Func can be called from within an expression.
-type Func func(arguments ...interface{}) (interface{}, error)
-
-// Function returns a Language with given constant
-func Function(name string, function Func) Language {
+// Function returns a Language with given function
+// Function has no conversion for input types
+// If the function returns an error it must be the last return parameter
+// If the function has (without the error) more then one return parameter
+// it returns them as []interface{}
+func Function(name string, function interface{}) Language {
 	l := newLanguage()
 	l.prefixes[name] = func(p *Parser) (eval Evaluable, err error) {
 		args := []Evaluable{}
@@ -79,7 +80,7 @@ func Function(name string, function Func) Language {
 		default:
 			p.Camouflage("function call", '(')
 		}
-		return p.callFunc(function, args...), nil
+		return p.callFunc(toFunc(function), args...), nil
 	}
 	return l
 }

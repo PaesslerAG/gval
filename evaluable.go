@@ -138,7 +138,7 @@ func variable(path ...Evaluable) Evaluable {
 	}
 }
 
-func (*Parser) callFunc(fun Func, args ...Evaluable) Evaluable {
+func (*Parser) callFunc(fun function, args ...Evaluable) Evaluable {
 	return func(c context.Context, v interface{}) (ret interface{}, err error) {
 		a := make([]interface{}, len(args))
 		for i, arg := range args {
@@ -199,7 +199,7 @@ func (*Parser) callEvaluable(fullname string, fun Evaluable, args ...Evaluable) 
 
 		switch len(r) {
 		case 0:
-			return nil, fmt.Errorf("function %s does not return any values", fullname)
+			return err, nil
 		case 1:
 			return r[0], err
 		default:
