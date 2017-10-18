@@ -623,6 +623,14 @@ func TestNoParameter(t *testing.T) {
 				want: map[string]interface{}{"1": true, "7.X": 9., "hello": "hey"},
 			},
 			{
+				name:       "Object negativ value",
+				expression: `{1: -1,"hello" : "hey"}`,
+				extension: Function("ten", func(arguments ...interface{}) (interface{}, error) {
+					return 10.0, nil
+				}),
+				want: map[string]interface{}{"1": -1., "hello": "hey"},
+			},
+			{
 				name:       "Empty Array",
 				expression: `[]`,
 				extension: Function("ten", func(arguments ...interface{}) (interface{}, error) {

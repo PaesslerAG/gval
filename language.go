@@ -41,7 +41,7 @@ func (l Language) NewEvaluable(expression string) (Evaluable, error) {
 
 	eval, err := p.ParseExpression()
 
-	if p.isCamouflaged() && p.lastScan != scanner.EOF {
+	if err == nil && p.isCamouflaged() && p.lastScan != scanner.EOF {
 		err = p.camouflage
 	}
 
@@ -133,13 +133,21 @@ func PrefixOperator(name string, e Evaluable) Language {
 		if err != nil {
 			return nil, err
 		}
-		return func(c context.Context, v interface{}) (interface{}, error) {
+		prefix := func(c context.Context, v interface{}) (interface{}, error) {
 			a, err := eval(c, v)
 			if err != nil {
 				return nil, err
 			}
 			return e(c, a)
-		}, nil
+		}
+		if eval.IsConst() {
+			v, err := prefix(context.Background(), nil)
+			if err != nil {
+				return nil, err
+			}
+			prefix = p.Const(v)
+		}
+		return prefix, nil
 	}
 	return l
 }

@@ -154,6 +154,11 @@ func TestParsingFailure(t *testing.T) {
 				expression: "0x12g1",
 				wantErr:    `strconv.ParseFloat: parsing "0x12": invalid syntax`,
 			},
+			{
+				name:       "Error after camouflage",
+				expression: "0 + ,",
+				wantErr:    `unexpected "," while scanning extensions`,
+			},
 		},
 		t,
 	)
