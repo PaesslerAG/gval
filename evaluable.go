@@ -208,7 +208,7 @@ func (*Parser) callEvaluable(fullname string, fun Evaluable, args ...Evaluable) 
 	}
 }
 
-//IsConst returns is evaluable is a Parser.Const value
+//IsConst returns if the Evaluable is a Parser.Const() value
 func (e Evaluable) IsConst() bool {
 	pc := reflect.ValueOf(constant(nil)).Pointer()
 	pe := reflect.ValueOf(e).Pointer()

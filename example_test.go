@@ -284,8 +284,8 @@ func ExampleEvaluate_jsonpath() {
 func ExampleLanguage() {
 	lang := gval.NewLanguage(gval.JSON(), gval.Arithmetic(),
 		//pipe operator
-		gval.PostfixOperator("|", func(p *gval.Parser, pre gval.Evaluable) (gval.Evaluable, error) {
-			post, err := p.ParseExpression()
+		gval.PostfixOperator("|", func(c context.Context, p *gval.Parser, pre gval.Evaluable) (gval.Evaluable, error) {
+			post, err := p.ParseExpression(c)
 			if err != nil {
 				return nil, err
 			}

@@ -9,15 +9,15 @@ import (
 )
 
 //ParseExpression scans an expression into an Evaluable.
-func (p *Parser) ParseExpression() (eval Evaluable, err error) {
+func (p *Parser) ParseExpression(c context.Context) (eval Evaluable, err error) {
 	stack := stageStack{}
 	for {
-		eval, err = p.ParseNextExpression()
+		eval, err = p.ParseNextExpression(c)
 		if err != nil {
 			return nil, err
 		}
 
-		if stage, err := p.parseOperator(&stack, eval); err != nil {
+		if stage, err := p.parseOperator(c, &stack, eval); err != nil {
 			return nil, err
 		} else if err = stack.push(stage); err != nil {
 			return nil, err
@@ -30,16 +30,16 @@ func (p *Parser) ParseExpression() (eval Evaluable, err error) {
 }
 
 //ParseNextExpression scans the expression ignoring following operators
-func (p *Parser) ParseNextExpression() (eval Evaluable, err error) {
+func (p *Parser) ParseNextExpression(c context.Context) (eval Evaluable, err error) {
 	scan := p.Scan()
 	ex, ok := p.prefixes[scan]
 	if !ok {
 		return nil, p.Expected("extensions")
 	}
-	return ex(p)
+	return ex(c, p)
 }
 
-func parseString(p *Parser) (Evaluable, error) {
+func parseString(c context.Context, p *Parser) (Evaluable, error) {
 	s, err := strconv.Unquote(p.TokenText())
 	if err != nil {
 		return nil, fmt.Errorf("could not parse string: %s", err)
@@ -47,7 +47,7 @@ func parseString(p *Parser) (Evaluable, error) {
 	return p.Const(s), nil
 }
 
-func parseNumber(p *Parser) (Evaluable, error) {
+func parseNumber(c context.Context, p *Parser) (Evaluable, error) {
 	n, err := strconv.ParseFloat(p.TokenText(), 64)
 	if err != nil {
 		return nil, err
@@ -55,8 +55,8 @@ func parseNumber(p *Parser) (Evaluable, error) {
 	return p.Const(n), nil
 }
 
-func parseParentheses(p *Parser) (Evaluable, error) {
-	eval, err := p.ParseExpression()
+func parseParentheses(c context.Context, p *Parser) (Evaluable, error) {
+	eval, err := p.ParseExpression(c)
 	if err != nil {
 		return nil, err
 	}
@@ -68,20 +68,20 @@ func parseParentheses(p *Parser) (Evaluable, error) {
 	}
 }
 
-func (p *Parser) parseOperator(stack *stageStack, eval Evaluable) (st stage, err error) {
+func (p *Parser) parseOperator(c context.Context, stack *stageStack, eval Evaluable) (st stage, err error) {
 	for {
-		c := p.Scan()
+		scan := p.Scan()
 		op := p.TokenText()
 		mustOp := false
-		if isSymbolOperation(c) {
-			c = p.Peek()
-			for isSymbolOperation(c) {
+		if isSymbolOperation(scan) {
+			scan = p.Peek()
+			for isSymbolOperation(scan) {
 				mustOp = true
-				op += string(c)
+				op += string(scan)
 				p.Next()
-				c = p.Peek()
+				scan = p.Peek()
 			}
-		} else if c != scanner.Ident {
+		} else if scan != scanner.Ident {
 			p.Camouflage("operator")
 			return stage{Evaluable: eval}, nil
 		}
@@ -106,7 +106,7 @@ func (p *Parser) parseOperator(stack *stageStack, eval Evaluable) (st stage, err
 			}); err != nil {
 				return stage{}, err
 			}
-			eval, err = operator.f(p, stack.pop().Evaluable, operator.operatorPrecedence)
+			eval, err = operator.f(c, p, stack.pop().Evaluable, operator.operatorPrecedence)
 			if err != nil {
 				return
 			}
@@ -121,7 +121,7 @@ func (p *Parser) parseOperator(stack *stageStack, eval Evaluable) (st stage, err
 	}
 }
 
-func parseIdent(p *Parser) (call string, alternative func() (Evaluable, error), err error) {
+func parseIdent(c context.Context, p *Parser) (call string, alternative func() (Evaluable, error), err error) {
 	token := p.TokenText()
 	return token,
 		func() (Evaluable, error) {
@@ -141,13 +141,13 @@ func parseIdent(p *Parser) (call string, alternative func() (Evaluable, error), 
 						return nil, p.Expected("field", scanner.Ident)
 					}
 				case '(':
-					args, err := p.parseArguments()
+					args, err := p.parseArguments(c)
 					if err != nil {
 						return nil, err
 					}
 					return p.callEvaluable(fullname, p.Var(keys...), args...), nil
 				case '[':
-					key, err := p.ParseExpression()
+					key, err := p.ParseExpression(c)
 					if err != nil {
 						return nil, err
 					}
@@ -166,13 +166,13 @@ func parseIdent(p *Parser) (call string, alternative func() (Evaluable, error), 
 
 }
 
-func (p *Parser) parseArguments() (args []Evaluable, err error) {
+func (p *Parser) parseArguments(c context.Context) (args []Evaluable, err error) {
 	if p.Scan() == ')' {
 		return
 	}
 	p.Camouflage("scan arguments", ')')
 	for {
-		arg, err := p.ParseExpression()
+		arg, err := p.ParseExpression(c)
 		args = append(args, arg)
 		if err != nil {
 			return nil, err
@@ -200,15 +200,15 @@ func inArray(a, b interface{}) (interface{}, error) {
 	return false, nil
 }
 
-func parseIf(p *Parser, e Evaluable) (Evaluable, error) {
-	a, err := p.ParseExpression()
+func parseIf(c context.Context, p *Parser, e Evaluable) (Evaluable, error) {
+	a, err := p.ParseExpression(c)
 	if err != nil {
 		return nil, err
 	}
 	b := p.Const(nil)
 	switch p.Scan() {
 	case ':':
-		b, err = p.ParseExpression()
+		b, err = p.ParseExpression(c)
 		if err != nil {
 			return nil, err
 		}
@@ -228,13 +228,13 @@ func parseIf(p *Parser, e Evaluable) (Evaluable, error) {
 	}, nil
 }
 
-func parseJSONArray(p *Parser) (Evaluable, error) {
+func parseJSONArray(c context.Context, p *Parser) (Evaluable, error) {
 	evals := []Evaluable{}
 	for {
 		switch p.Scan() {
 		default:
 			p.Camouflage("array", ',', ']')
-			eval, err := p.ParseExpression()
+			eval, err := p.ParseExpression(c)
 			if err != nil {
 				return nil, err
 			}
@@ -257,7 +257,7 @@ func parseJSONArray(p *Parser) (Evaluable, error) {
 	}
 }
 
-func parseJSONObject(p *Parser) (Evaluable, error) {
+func parseJSONObject(c context.Context, p *Parser) (Evaluable, error) {
 	type kv struct {
 		key   Evaluable
 		value Evaluable
@@ -267,7 +267,7 @@ func parseJSONObject(p *Parser) (Evaluable, error) {
 		switch p.Scan() {
 		default:
 			p.Camouflage("object", ',', '}')
-			key, err := p.ParseExpression()
+			key, err := p.ParseExpression(c)
 			if err != nil {
 				return nil, err
 			}
@@ -276,7 +276,7 @@ func parseJSONObject(p *Parser) (Evaluable, error) {
 					return nil, p.Expected("object", ':')
 				}
 			}
-			value, err := p.ParseExpression()
+			value, err := p.ParseExpression(c)
 			if err != nil {
 				return nil, err
 			}

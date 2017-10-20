@@ -291,11 +291,11 @@ func (op directInfix) merge(op2 operator) operator {
 	return op
 }
 
-type prefix func(*Parser) (Evaluable, error)
+type prefix func(context.Context,*Parser) (Evaluable, error)
 
 type postfix struct {
 	operatorPrecedence
-	f func(*Parser, Evaluable, operatorPrecedence) (Evaluable, error)
+	f func(context.Context, *Parser, Evaluable, operatorPrecedence) (Evaluable, error)
 }
 
 func (op postfix) merge(op2 operator) operator {

@@ -39,7 +39,7 @@ func newLanguage() Language {
 func (l Language) NewEvaluable(expression string) (Evaluable, error) {
 	p := newParser(expression, l)
 
-	eval, err := p.ParseExpression()
+	eval, err := p.ParseExpression(context.Background())
 
 	if err == nil && p.isCamouflaged() && p.lastScan != scanner.EOF {
 		err = p.camouflage
@@ -68,12 +68,12 @@ func (l Language) Evaluate(expression string, parameter interface{}) (interface{
 // it returns them as []interface{}
 func Function(name string, function interface{}) Language {
 	l := newLanguage()
-	l.prefixes[name] = func(p *Parser) (eval Evaluable, err error) {
+	l.prefixes[name] = func(c context.Context, p *Parser) (eval Evaluable, err error) {
 		args := []Evaluable{}
 		scan := p.Scan()
 		switch scan {
 		case '(':
-			args, err = p.parseArguments()
+			args, err = p.parseArguments(c)
 			if err != nil {
 				return nil, err
 			}
@@ -88,24 +88,24 @@ func Function(name string, function interface{}) Language {
 // Constant returns a Language with given constant
 func Constant(name string, value interface{}) Language {
 	l := newLanguage()
-	l.prefixes[name] = func(p *Parser) (eval Evaluable, err error) {
+	l.prefixes[name] = func(c context.Context, p *Parser) (eval Evaluable, err error) {
 		return p.Const(value), nil
 	}
 	return l
 }
 
 // PrefixExtension extends a Language
-func PrefixExtension(r rune, ext func(*Parser) (Evaluable, error)) Language {
+func PrefixExtension(r rune, ext func(context.Context, *Parser) (Evaluable, error)) Language {
 	l := newLanguage()
 	l.prefixes[r] = ext
 	return l
 }
 
 // PrefixMetaPrefix choose a Prefix to be executed
-func PrefixMetaPrefix(r rune, ext func(*Parser) (call string, alternative func() (Evaluable, error), err error)) Language {
+func PrefixMetaPrefix(r rune, ext func(context.Context, *Parser) (call string, alternative func() (Evaluable, error), err error)) Language {
 	l := newLanguage()
-	l.prefixes[r] = func(p *Parser) (Evaluable, error) {
-		call, alternative, err := ext(p)
+	l.prefixes[r] = func(c context.Context, p *Parser) (Evaluable, error) {
+		call, alternative, err := ext(c, p)
 		if err != nil {
 			return nil, err
 		}
@@ -114,7 +114,7 @@ func PrefixMetaPrefix(r rune, ext func(*Parser) (call string, alternative func()
 			key = ([]rune(call))[0] //TODO getter and setter
 		}
 		if prefix, ok := p.prefixes[key]; ok {
-			return prefix(p)
+			return prefix(c, p)
 		}
 		return alternative()
 	}
@@ -128,8 +128,8 @@ func PrefixOperator(name string, e Evaluable) Language {
 	if len(name) == 1 && !unicode.IsLetter(([]rune(name))[0]) {
 		key = ([]rune(name))[0] //TODO getter and setter
 	}
-	l.prefixes[key] = func(p *Parser) (Evaluable, error) {
-		eval, err := p.ParseNextExpression()
+	l.prefixes[key] = func(c context.Context, p *Parser) (Evaluable, error) {
+		eval, err := p.ParseNextExpression(c)
 		if err != nil {
 			return nil, err
 		}
@@ -153,11 +153,11 @@ func PrefixOperator(name string, e Evaluable) Language {
 }
 
 // PostfixOperator extends a Language
-func PostfixOperator(name string, ext func(*Parser, Evaluable) (Evaluable, error)) Language {
+func PostfixOperator(name string, ext func(context.Context, *Parser, Evaluable) (Evaluable, error)) Language {
 	l := newLanguage()
 	l.operators[name] = postfix{
-		f: func(p *Parser, eval Evaluable, pre operatorPrecedence) (Evaluable, error) {
-			return ext(p, eval)
+		f: func(c context.Context, p *Parser, eval Evaluable, pre operatorPrecedence) (Evaluable, error) {
+			return ext(c, p, eval)
 		},
 	}
 	return l
