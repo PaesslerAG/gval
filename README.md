@@ -4,7 +4,6 @@ Gval
 [![Build Status](https://travis-ci.org/PaesslerAG/gval.svg?branch=master)](https://travis-ci.org/PaesslerAG/gval)
 [![Godoc](https://godoc.org/github.com/PaesslerAG/gval?status.png)](https://godoc.org/github.com/PaesslerAG/gval)
 
-
 Gval (Go EVALuate) provides support for evaluating arbitrary expressions, in particular Go-like expressions.
 
 Evaluate
@@ -60,24 +59,25 @@ This may be convenient but note that using accessors makes the expression about 
 Default Language
 --
 
-* Modifiers: `+` `-` `/` `*` `&` `|` `^` `**` `%` `>>` `<<`
-* Comparators: `>` `>=` `<` `<=` `==` `!=` `=~` `!~`
-* Logical ops: `||` `&&`
-* Numeric constants, as 64-bit floating point (`12345.678`)
-* String constants (double quotes: `"foobar"`)
-* Date function 'Date(x)', using any permutation of RFC3339, ISO8601, ruby date, or unix date
-* Boolean constants: `true` `false`
-* Parentheses to control order of evaluation `(` `)`
-* Json Arrays : `[1, 2, "foo"]`
-* Json Objects : `{"a":1, "b":2, "c":"foo"}`
-* Prefixes: `!` `-` `~`
-* Ternary conditional: `?` `:`
-* Null coalescence: `??`
+- Modifiers: `+` `-` `/` `*` `&` `|` `^` `**` `%` `>>` `<<`
+- Comparators: `>` `>=` `<` `<=` `==` `!=` `=~` `!~`
+- Logical ops: `||` `&&`
+- Numeric constants, as 64-bit floating point (`12345.678`)
+- String constants (double quotes: `"foobar"`)
+- Date function 'Date(x)', using any permutation of RFC3339, ISO8601, ruby date, or unix date
+- Boolean constants: `true` `false`
+- Parentheses to control order of evaluation `(` `)`
+- Json Arrays : `[1, 2, "foo"]`
+- Json Objects : `{"a":1, "b":2, "c":"foo"}`
+- Prefixes: `!` `-` `~`
+- Ternary conditional: `?` `:`
+- Null coalescence: `??`
 
 See [Godoc](https://godoc.org/github.com/PaesslerAG/gval/#Gval) for gval.Language details.
 
 Customize
 --
+
 Gval is completly customizable. Every constant, function or operator can be defined separately and existing expressing languages can be reused:
 
 - [foo.Hello + foo.World()](https://godoc.org/github.com/PaesslerAG/gval/#example_Language)
@@ -90,7 +90,7 @@ Performance
 The library is built with the intention of being quick but has not been aggressively profiled and optimized. For most applications, though, it is completely fine.
 If performance is an issue, make sure to create your expression language with all functions, constants and operators only once. Evaluating an expression like gval.Evaluate("expression, const1, func1, func2, ...) creates a new gval.Language everytime it is called and slows execution.
 
-The library comes with a bunch of benchmarks to measure the performance of parsing and evaluating expressions. You can run them with `go test -bench=.`. 
+The library comes with a bunch of benchmarks to measure the performance of parsing and evaluating expressions. You can run them with `go test -bench=.`.
 
 For a very rough idea of performance, here are the results from a benchmark run on a Dell Latitude E7470 Win 10 i5-6300U.
 
