@@ -7,7 +7,7 @@ import (
 	"unicode"
 )
 
-// Language is an expression lanmguage
+// Language is an expression language
 type Language struct {
 	prefixes  map[interface{}]prefix
 	operators map[string]operator
@@ -61,11 +61,13 @@ func (l Language) Evaluate(expression string, parameter interface{}) (interface{
 	return eval(context.Background(), parameter)
 }
 
-// Function returns a Language with given function
-// Function has no conversion for input types
-// If the function returns an error it must be the last return parameter
-// If the function has (without the error) more then one return parameter
-// it returns them as []interface{}
+// Function returns a Language with given function.
+// Function has no conversion for input types.
+//
+// If the function returns an error it must be the last return parameter.
+//
+// If the function has (without the error) more then one return parameter,
+// it returns them as []interface{}.
 func Function(name string, function interface{}) Language {
 	l := newLanguage()
 	l.prefixes[name] = func(c context.Context, p *Parser) (eval Evaluable, err error) {
@@ -101,7 +103,7 @@ func PrefixExtension(r rune, ext func(context.Context, *Parser) (Evaluable, erro
 	return l
 }
 
-// PrefixMetaPrefix choose a Prefix to be executed
+// PrefixMetaPrefix chooses a Prefix to be executed
 func PrefixMetaPrefix(r rune, ext func(context.Context, *Parser) (call string, alternative func() (Evaluable, error), err error)) Language {
 	l := newLanguage()
 	l.prefixes[r] = func(c context.Context, p *Parser) (Evaluable, error) {
@@ -194,7 +196,7 @@ func Precedence(name string, operatorPrecendence uint8) Language {
 }
 
 // InfixEvalOperator operates on the raw operands.
-// Therefore it can not be combined with operators for other operand types.
+// Therefore it cannot be combined with operators for other operand types.
 func InfixEvalOperator(name string, f func(a, b Evaluable) (Evaluable, error)) Language {
 	return newLanguageOperator(name, directInfix{infixBuilder: f})
 }

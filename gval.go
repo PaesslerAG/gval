@@ -1,5 +1,5 @@
-// Package gval provides a generic expression language with concreate language instances of several basic languages.
-// In gval base language an Operator involves either unicode letters or unicode punctuations and unicode symbols.
+// Package gval provides a generic expression language with concrete language instances of several basic languages.
+// In gval base language, an Operator involves either unicode letters or unicode punctuations and unicode symbols.
 package gval
 
 import (
@@ -28,10 +28,11 @@ func Evaluate(expression string, parameter interface{}, opts ...Language) (inter
 	return v, nil
 }
 
-// Full is the union of Arithmetic, Bitmask, Text, PropositionalLogic and Json
-// Operator in: a in b is true iff value a is an element of array b
-// Operator ??: a ?? b returns a if a is not false or nil, otherwise n
-// Operator ?: a ? b : c returns b if bool a is true, otherwise b
+// Full is the union of Arithmetic, Bitmask, Text, PropositionalLogic, and Json
+// 		Operator in: a in b is true iff value a is an element of array b
+// 		Operator ??: a ?? b returns a if a is not false or nil, otherwise n
+// 		Operator ?: a ? b : c returns b if bool a is true, otherwise b
+//
 // Function Date: Date(a) parses string a. a must match RFC3339, ISO8601, ruby date, or unix date
 func Full(extensions ...Language) Language {
 	if len(extensions) == 0 {
@@ -42,17 +43,19 @@ func Full(extensions ...Language) Language {
 
 // Arithmetic contains base, plus(+), minus(-), divide(/), power(**), negative(-)
 // and numerical order (<=,<,>,>=)
+//
 // Arithmetic operators expect float64 operands.
-// Called with unfitting input they try to convert the input to float64.
-// They can parse strings and convert any type of int or float
+// Called with unfitting input, they try to convert the input to float64.
+// They can parse strings and convert any type of int or float.
 func Arithmetic() Language {
 	return arithmetic
 }
 
-// Bitmask contains base, bitwise and(&), bitwise or(|), bitwise not(^),
+// Bitmask contains base, bitwise and(&), bitwise or(|) and bitwise not(^).
+//
 // Bitmask operators expect float64 operands.
 // Called with unfitting input they try to convert the input to float64.
-// They can parse strings and convert any type of int or float
+// They can parse strings and convert any type of int or float.
 func Bitmask() Language {
 	return bitmask
 }
@@ -63,10 +66,11 @@ func Text() Language {
 	return text
 }
 
-// PropositionalLogic contains base, not(!), and (&&), or (||) and Base
+// PropositionalLogic contains base, not(!), and (&&), or (||) and Base.
+//
 // Propositional operator expect bool operands.
 // Called with unfitting input they try to convert the input to bool.
-// Numbers others then 0 and the strings "TRUE" and "true" are interpreted as true.
+// Numbers other than 0 and the strings "TRUE" and "true" are interpreted as true.
 // 0 and the strings "FALSE" and "false" are interpreted as false.
 func PropositionalLogic() Language {
 	return propositionalLogic
@@ -78,7 +82,7 @@ func JSON() Language {
 	return ljson
 }
 
-// Base contains equal (==) and not equal (!=), perantheses and general support for variables, constants and functions
+// Base contains equal (==) and not equal (!=), perentheses and general support for variables, constants and functions
 // It contains true, false, (floating point) number, string  ("" or ``) and char ('') constants
 func Base() Language {
 	return base

@@ -83,7 +83,7 @@ func (p *Parser) TokenText() string {
 	return p.scanner.TokenText()
 }
 
-//Expected returns an error signals an unexpected Scan() result
+//Expected returns an error signaling an unexpected Scan() result
 func (p *Parser) Expected(unit string, expected ...rune) error {
 	return unexpectedRune{unit, expected, p.lastScan}
 }

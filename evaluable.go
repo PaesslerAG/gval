@@ -40,7 +40,7 @@ func (e Evaluable) EvalFloat64(c context.Context, parameter interface{}) (float6
 	return f, nil
 }
 
-//EvalBool evaluates given parameter to an bool
+//EvalBool evaluates given parameter to a bool
 func (e Evaluable) EvalBool(c context.Context, parameter interface{}) (bool, error) {
 	v, err := e(c, parameter)
 	if err != nil {
@@ -54,7 +54,7 @@ func (e Evaluable) EvalBool(c context.Context, parameter interface{}) (bool, err
 	return b, nil
 }
 
-//EvalString evaluates given parameter to an string
+//EvalString evaluates given parameter to a string
 func (e Evaluable) EvalString(c context.Context, parameter interface{}) (string, error) {
 	o, err := e(c, parameter)
 	if err != nil {
@@ -74,7 +74,7 @@ func constant(value interface{}) Evaluable {
 	}
 }
 
-//Var Evaluable represents value at given path
+//Var Evaluable represents value at given path.
 //It supports:
 //	map[string]interface{},
 // 	[]interface{} and

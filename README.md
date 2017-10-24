@@ -5,40 +5,39 @@ Gval
 [![Godoc](https://godoc.org/github.com/PaesslerAG/gval?status.png)](https://godoc.org/github.com/PaesslerAG/gval)
 
 
-Gval (Go EVALuate) provides support for evaluating arbitrary expressions. In particular for Go-like expressions.
+Gval (Go EVALuate) provides support for evaluating arbitrary expressions, in particular Go-like expressions.
 
 Evaluate
 --
 
-Gval can evaluate expressions with parameters, arimethetic, logical and string operations:
+Gval can evaluate expressions with parameters, arimethetic, logical, and string operations:
 
 - basic expression: [10 > 0](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_basic)
-- parametrized expression: [foo > 0](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_parameter)
-- nested parametrized expression: [foo.bar > 0](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_nestedParameter)
+- parameterized expression: [foo > 0](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_parameter)
+- nested parameterized expression: [foo.bar > 0](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_nestedParameter)
 - arithmetic expression: [(requests_made * requests_succeeded / 100) >= 90](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_arithmetic)
 - string expression: [http_response_body == "service is ok"](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_string)
 - float64 expression: [(mem_used / total_mem) * 100](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_float64)
 
-It can be easily extended with custom functions or operators:
+It can easily be extended with custom functions or operators:
 
 - custom date comparator: [date(\`2014-01-02\`) > date(\`2014-01-01 23:59:59\`)](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_dateComparison)
 - string length: [strlen("someReallyLongInputString") <= 16](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_basic)
 
-
-You can parse Expressions once, and can re-use them multiple times. Parsing is the compute-intensive phase of the process, so if you intend to use the same expression with different parameters, just parse it once:
+You can parse gval.Expressions once and re-use them multiple times. Parsing is the compute-intensive phase of the process, so if you intend to use the same expression with different parameters, just parse it once:
 
 - [Parsing and Evaluation](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluable)
 
-The normal Go-standard order of operators is respected. When writing an expression, be sure that you either order the operators correctly, or use parenthesis to clarify which portions of an expression should be run first.
+The normal Go-standard order of operators is respected. When writing an expression, be sure that you either order the operators correctly, or use parentheses to clarify which portions of an expression should be run first.
 
-Strings, numbers and booleans can be used like in go:
+Strings, numbers, and booleans can be used like in Go:
 
 - [(7 < "47" == true ? "hello world!\n\u263a") + \` more text\`](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluable)
 
-Maps and Arrays 
+Maps and Arrays
 --
 
-Parameter names like response-time will be interpreted as response minus time. While gval don't support those parameter names directly, you can easily access them via [JSON Path](https://github.com/PaesslerAG/jsonpath):
+Parameter names like response-time will be interpreted as response minus time. While gval doesn't support these parameter names directly, you can easily access them via [JSON Path](https://github.com/PaesslerAG/jsonpath):
 
 - [$["response-time"]](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_jsonpath)
 
@@ -51,13 +50,12 @@ If you have structs in your parameters, you can access their fields and methods 
 
 - [foo.Hello + foo.World()](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_flatAccessor)
 
-It works also if the parameter is a struct directly
+It also works if the parameter is a struct directly
 [Hello + World()](https://godoc.org/github.com/PaesslerAG/gval/#accessor)
 or if the fields are nested
 [foo.Hello + foo.World()](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluate_nestedAccessor)
 
-
-This may be convenient, but note that using accessors makes the expression about four times slower than just using a parameter (consult the benchmarks for more precise measurements on your system). If there are functions you want to use, it's faster (and probably cleaner) to define them as functions (see the Evaluate section). These approaches use no reflection, and are designed to be fast and clean.
+This may be convenient but note that using accessors makes the expression about four times slower than just using a parameter (consult the benchmarks for more precise measurements on your system). If there are functions you want to use, it's faster (and probably cleaner) to define them as functions (see the Evaluate section). These approaches use no reflection, and are designed to be fast and clean.
 
 Default Language
 --
@@ -69,18 +67,18 @@ Default Language
 * String constants (double quotes: `"foobar"`)
 * Date function 'Date(x)', using any permutation of RFC3339, ISO8601, ruby date, or unix date
 * Boolean constants: `true` `false`
-* Parenthesis to control order of evaluation `(` `)`
+* Parentheses to control order of evaluation `(` `)`
 * Json Arrays : `[1, 2, "foo"]`
 * Json Objects : `{"a":1, "b":2, "c":"foo"}`
 * Prefixes: `!` `-` `~`
 * Ternary conditional: `?` `:`
 * Null coalescence: `??`
 
-See [Godoc](https://godoc.org/github.com/PaesslerAG/gval/#Gval) for Language details.
+See [Godoc](https://godoc.org/github.com/PaesslerAG/gval/#Gval) for gval.Language details.
 
 Customize
 --
-Gval is completly customizable. Every constant, function or operator can be defined seperatly and extsting expressing languages can be reused:
+Gval is completly customizable. Every constant, function or operator can be defined separately and existing expressing languages can be reused:
 
 - [foo.Hello + foo.World()](https://godoc.org/github.com/PaesslerAG/gval/#example_Language)
 
@@ -88,14 +86,15 @@ For details see [Godoc](https://godoc.org/github.com/PaesslerAG/gval).
 
 Performance
 --
-The library is built with an eye towards being quick, but has not been aggressively profiled and optimized. For most applications, though, it is completely fine. 
-If performance is a thing, make sure to create your expression language with all functions, constants and operators only once. Evaluating an expression like gval.Evaluate("expression, const1, func1, func2, ...) creates erverytime it is called a new gval.Language and slows execution.  
+
+The library is built with the intention of being quick but has not been aggressively profiled and optimized. For most applications, though, it is completely fine.
+If performance is an issue, make sure to create your expression language with all functions, constants and operators only once. Evaluating an expression like gval.Evaluate("expression, const1, func1, func2, ...) creates a new gval.Language everytime it is called and slows execution.
 
 The library comes with a bunch of benchmarks to measure the performance of parsing and evaluating expressions. You can run them with `go test -bench=.`. 
 
-For a very rough idea of performance, here are the results output from a benchmark run on a Dell Latitude E7470 Win 10 i5-6300U.
+For a very rough idea of performance, here are the results from a benchmark run on a Dell Latitude E7470 Win 10 i5-6300U.
 
-```
+``` text
 BenchmarkGval/const_evaluation-4                               500000000                 3.57 ns/op
 BenchmarkGval/const_parsing-4                                    1000000              1144 ns/op
 BenchmarkGval/single_parameter_evaluation-4                     10000000               165 ns/op
@@ -129,7 +128,7 @@ ok
 API Breaks
 --
 
-The library is des designed for API stability but the classification of gvals sub languages is not final yet. Releases will explicitly state when an API break happens, and if they do not specify an API break it should be safe to upgrade.
+The library is designed for API stability but the classification of gvals sub languages is not final yet. Releases will explicitly state when an API break happens, and if they do not specify an API break it should be safe to upgrade.
 
 Missing Features
 --

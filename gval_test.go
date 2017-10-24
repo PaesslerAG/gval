@@ -12,7 +12,7 @@ type evaluationTest struct {
 	expression string
 	extension  Language
 	parameter  interface{}
-	want       interface{} //want
+	want       interface{}
 	wantErr    string
 }
 
