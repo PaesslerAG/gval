@@ -128,11 +128,10 @@ ok
 API Breaks
 --
 
-The library is designed for API stability but the classification of gvals sub languages is not final yet. Releases will explicitly state when an API break happens, and if they do not specify an API break it should be safe to upgrade.
+The library is designed for API stability but still in beta. Stable releases will explicitly state when an API break happens via an increased the major version number.
 
 Missing Features
 --
 
-- [ ] Expression Formatter
-- [ ] SQL Expression
-- [ ] Examples for Language
+- [ ] Expression Formatter (a new Language that formats a expressions)
+- [ ] SQL Expression (a new Language that converts a expression into a SQL expression)
