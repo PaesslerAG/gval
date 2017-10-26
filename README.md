@@ -11,17 +11,17 @@ Evaluate
 
 Gval can evaluate expressions with parameters, arimethetic, logical, and string operations:
 
-- basic expression: [10 > 0](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--basic)
-- parameterized expression: [foo > 0](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--parameter)
-- nested parameterized expression: [foo.bar > 0](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--nestedParameter)
-- arithmetic expression: [(requests_made * requests_succeeded / 100) >= 90](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--arithmetic)
-- string expression: [http_response_body == "service is ok"](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--string)
-- float64 expression: [(mem_used / total_mem) * 100](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--float64)
+- basic expression: [10 > 0](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--Basic)
+- parameterized expression: [foo > 0](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--Parameter)
+- nested parameterized expression: [foo.bar > 0](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--NestedParameter)
+- arithmetic expression: [(requests_made * requests_succeeded / 100) >= 90](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--Arithmetic)
+- string expression: [http_response_body == "service is ok"](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--String)
+- float64 expression: [(mem_used / total_mem) * 100](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--Float64)
 
 It can easily be extended with custom functions or operators:
 
-- custom date comparator: [date(\`2014-01-02\`) > date(\`2014-01-01 23:59:59\`)](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--dateComparison)
-- string length: [strlen("someReallyLongInputString") <= 16](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--basic)
+- custom date comparator: [date(\`2014-01-02\`) > date(\`2014-01-01 23:59:59\`)](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--DateComparison)
+- string length: [strlen("someReallyLongInputString") <= 16](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--Strlen)
 
 You can parse gval.Expressions once and re-use them multiple times. Parsing is the compute-intensive phase of the process, so if you intend to use the same expression with different parameters, just parse it once:
 
@@ -31,14 +31,14 @@ The normal Go-standard order of operators is respected. When writing an expressi
 
 Strings, numbers, and booleans can be used like in Go:
 
-- [(7 < "47" == true ? "hello world!\n\u263a") + \` more text\`](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluable)
+- [(7 < "47" == true ? "hello world!\n\u263a") + \` more text\`](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluable--Encoding)
 
 Maps and Arrays
 --
 
 Parameter names like response-time will be interpreted as response minus time. While gval doesn't support these parameter names directly, you can easily access them via [JSON Path](https://github.com/PaesslerAG/jsonpath):
 
-- [$["response-time"]](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--jsonpath)
+- [$["response-time"]](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--Jsonpath)
 
 Jsonpath is also suitable for accessing array elements.
 
@@ -47,12 +47,12 @@ Accessors
 
 If you have structs in your parameters, you can access their fields and methods in the usual way:
 
-- [foo.Hello + foo.World()](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--flatAccessor)
+- [foo.Hello + foo.World()](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--FlatAccessor)
 
 It also works if the parameter is a struct directly
-[Hello + World()](https://godoc.org/github.com/PaesslerAG/gval/#accessor)
+[Hello + World()](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--Accessor)
 or if the fields are nested
-[foo.Hello + foo.World()](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--nestedAccessor)
+[foo.Hello + foo.World()](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--NestedAccessor)
 
 This may be convenient but note that using accessors makes the expression about four times slower than just using a parameter (consult the benchmarks for more precise measurements on your system). If there are functions you want to use, it's faster (and probably cleaner) to define them as functions (see the Evaluate section). These approaches use no reflection, and are designed to be fast and clean.
 
