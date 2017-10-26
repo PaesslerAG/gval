@@ -28,5 +28,3 @@ manual_test.go
 *.err
 
 .vscode
-
-vendor

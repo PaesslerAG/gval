@@ -1,8 +1,6 @@
 language: go
 
-script: go test -bench=. -benchmem -coverprofile coverage.out ./...
-
-script: travis_wait go test -bench=Random -benchtime 10m -timeout 30m -benchmem -coverprofile coverage.out ./...
+script: travis_wait ./test.sh
 
 go:
   - 1.9
