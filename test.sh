@@ -16,7 +16,7 @@ then
 fi
 
 # run random test for a longer period.
-go test -bench=Random -benchtime 9m -timeout 30m -benchmem -coverprofile coverage.out
+travis_wait go test -bench=Random -benchtime 10m -timeout 30m -benchmem -coverprofile coverage.out
 status=$?
 
 if [ "${status}" != 0 ];
