@@ -18,6 +18,7 @@ export GOPATH="${TEMPORARY_PATH}"
 pushd "${TEMPORARY_PATH}/src"
 
 # run the actual tests.
+cd FULL_PATH
 go test -bench=. -benchmem -coverprofile coverage.out
 status=$?
 
