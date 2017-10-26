@@ -1,12 +1,8 @@
 language: go
 
-gobuild_args: -bench=. -benchmem -coverprofile coverage.out
+script: go test -bench=. -benchmem -coverprofile coverage.out ./...
 
-script: go test ./...
-
-gobuild_args: -bench=Random -benchtime 10m -timeout 30m -benchmem -coverprofile coverage.out
-
-script: travis_wait go test ./...
+script: travis_wait go test -bench=Random -benchtime 10m -timeout 30m -benchmem -coverprofile coverage.out ./...
 
 go:
   - 1.9
