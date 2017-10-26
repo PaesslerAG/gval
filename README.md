@@ -25,13 +25,13 @@ It can easily be extended with custom functions or operators:
 
 You can parse gval.Expressions once and re-use them multiple times. Parsing is the compute-intensive phase of the process, so if you intend to use the same expression with different parameters, just parse it once:
 
-- [Parsing and Evaluation](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluable)
+- [Parsing and Evaluation](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluable)
 
 The normal Go-standard order of operators is respected. When writing an expression, be sure that you either order the operators correctly, or use parentheses to clarify which portions of an expression should be run first.
 
 Strings, numbers, and booleans can be used like in Go:
 
-- [(7 < "47" == true ? "hello world!\n\u263a") + \` more text\`](https://godoc.org/github.com/PaesslerAG/gval/#example_Evaluable--Encoding)
+- [(7 < "47" == true ? "hello world!\n\u263a") + \` more text\`](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--Encoding)
 
 Maps and Arrays
 --
