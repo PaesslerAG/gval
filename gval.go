@@ -90,8 +90,6 @@ func Base() Language {
 
 var full = NewLanguage(arithmetic, bitmask, text, propositionalLogic, ljson,
 
-	//TODO following language parts should be moved to subpackages
-
 	InfixOperator("in", inArray),
 
 	InfixShortCircuit("??", func(a interface{}) (interface{}, bool) {

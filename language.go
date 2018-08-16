@@ -9,8 +9,9 @@ import (
 
 // Language is an expression language
 type Language struct {
-	prefixes  map[interface{}]prefix
-	operators map[string]operator
+	prefixes        map[interface{}]prefix
+	operators       map[string]operator
+	operatorSymbols map[rune]struct{}
 }
 
 // NewLanguage returns the union of given Languages as new Language.
@@ -24,14 +25,18 @@ func NewLanguage(bases ...Language) Language {
 			l.operators[i] = e.merge(l.operators[i])
 			l.operators[i].initiate(i)
 		}
+		for i := range base.operatorSymbols {
+			l.operatorSymbols[i] = struct{}{}
+		}
 	}
 	return l
 }
 
 func newLanguage() Language {
 	return Language{
-		prefixes:  map[interface{}]prefix{},
-		operators: map[string]operator{},
+		prefixes:        map[interface{}]prefix{},
+		operators:       map[string]operator{},
+		operatorSymbols: map[rune]struct{}{},
 	}
 }
 
@@ -90,7 +95,7 @@ func Function(name string, function interface{}) Language {
 // Constant returns a Language with given constant
 func Constant(name string, value interface{}) Language {
 	l := newLanguage()
-	l.prefixes[name] = func(c context.Context, p *Parser) (eval Evaluable, err error) {
+	l.prefixes[l.makePrefixKey(name)] = func(c context.Context, p *Parser) (eval Evaluable, err error) {
 		return p.Const(value), nil
 	}
 	return l
@@ -111,11 +116,7 @@ func PrefixMetaPrefix(r rune, ext func(context.Context, *Parser) (call string, a
 		if err != nil {
 			return nil, err
 		}
-		key := interface{}(call)
-		if len(call) == 1 && !unicode.IsLetter(([]rune(call))[0]) {
-			key = ([]rune(call))[0] //TODO getter and setter
-		}
-		if prefix, ok := p.prefixes[key]; ok {
+		if prefix, ok := p.prefixes[l.makePrefixKey(call)]; ok {
 			return prefix(c, p)
 		}
 		return alternative()
@@ -126,11 +127,7 @@ func PrefixMetaPrefix(r rune, ext func(context.Context, *Parser) (call string, a
 //PrefixOperator returns a Language with given prefix
 func PrefixOperator(name string, e Evaluable) Language {
 	l := newLanguage()
-	key := interface{}(name)
-	if len(name) == 1 && !unicode.IsLetter(([]rune(name))[0]) {
-		key = ([]rune(name))[0] //TODO getter and setter
-	}
-	l.prefixes[key] = func(c context.Context, p *Parser) (Evaluable, error) {
+	l.prefixes[l.makePrefixKey(name)] = func(c context.Context, p *Parser) (Evaluable, error) {
 		eval, err := p.ParseNextExpression(c)
 		if err != nil {
 			return nil, err
@@ -204,6 +201,22 @@ func InfixEvalOperator(name string, f func(a, b Evaluable) (Evaluable, error)) L
 func newLanguageOperator(name string, op operator) Language {
 	op.initiate(name)
 	l := newLanguage()
-	l.operators[name] = op
+	l.operators[l.makeInfixKey(name)] = op
 	return l
+}
+
+func (l *Language) makePrefixKey(key string) interface{} {
+	runes := []rune(key)
+	if len(runes) == 1 && !unicode.IsLetter(runes[0]) {
+		return runes[0]
+	}
+	return key
+}
+
+func (l *Language) makeInfixKey(key string) string {
+	runes := []rune(key)
+	for _, r := range runes {
+		l.operatorSymbols[r] = struct{}{}
+	}
+	return key
 }

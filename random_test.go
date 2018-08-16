@@ -109,8 +109,6 @@ const (
 	SEED = 1487873697990155515
 )
 
-//TODO laufzeit im script heraufstellen
-
 func BenchmarkRandom(bench *testing.B) {
 	rand.Seed(SEED)
 	for i := 0; i < bench.N; i++ {
@@ -121,7 +119,7 @@ func BenchmarkRandom(bench *testing.B) {
 			expression += fmt.Sprintf(" %s", getRandom(values))
 		}
 
-		Evaluate(expression, nil) //TODO fill parameter with random values?
+		Evaluate(expression, nil)
 	}
 }
 
