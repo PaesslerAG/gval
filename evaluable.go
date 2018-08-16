@@ -99,7 +99,7 @@ func variable(path ...Evaluable) Evaluable {
 				v = o[k]
 				continue
 			case []interface{}:
-				if i, err := strconv.Atoi(k); err == nil && len(o) > i {
+				if i, err := strconv.Atoi(k); err == nil && i >= 0 && len(o) > i {
 					v = o[i]
 					continue
 				}

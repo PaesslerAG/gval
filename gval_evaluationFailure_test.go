@@ -20,92 +20,77 @@ func TestModifierTyping(test *testing.T) {
 	evaluationTests := []evaluationTest{
 		//ModifierTyping
 		{
-
 			name:       "PLUS literal number to literal bool",
 			expression: "1 + true",
 			want:       "1true", // + on string is defined
 		},
 		{
-
 			name:       "PLUS number to bool",
 			expression: "number + bool",
 			want:       "1true", // + on string is defined
 		},
 		{
-
 			name:       "MINUS number to bool",
 			expression: "number - bool",
 			wantErr:    invalidOperator,
 		},
 		{
-
 			name:       "MINUS number to bool",
 			expression: "number - bool",
 			wantErr:    invalidOperator,
 		},
 		{
-
 			name:       "MULTIPLY number to bool",
 			expression: "number * bool",
 			wantErr:    invalidOperator,
 		},
 		{
-
 			name:       "DIVIDE number to bool",
 			expression: "number / bool",
 			wantErr:    invalidOperator,
 		},
 		{
-
 			name:       "EXPONENT number to bool",
 			expression: "number ** bool",
 			wantErr:    invalidOperator,
 		},
 		{
-
 			name:       "MODULUS number to bool",
 			expression: "number % bool",
 			wantErr:    invalidOperator,
 		},
 		{
-
 			name:       "XOR number to bool",
 			expression: "number % bool",
 			wantErr:    invalidOperator,
 		},
 		{
-
 			name:       "BITWISE_OR number to bool",
 			expression: "number | bool",
 			wantErr:    invalidOperator,
 		},
 		{
-
 			name:       "BITWISE_AND number to bool",
 			expression: "number & bool",
 			wantErr:    invalidOperator,
 		},
 		{
-
 			name:       "BITWISE_XOR number to bool",
 			expression: "number ^ bool",
 			wantErr:    invalidOperator,
 		},
 		{
-
 			name:       "BITWISE_LSHIFT number to bool",
 			expression: "number << bool",
 			wantErr:    invalidOperator,
 		},
 		{
-
 			name:       "BITWISE_RSHIFT number to bool",
 			expression: "number >> bool",
 			wantErr:    invalidOperator,
 		},
 		//LogicalOperatorTyping
 		{
-
 			name:       "AND number to number",
 			expression: "number && number",
 			want:       true, // number != 0 is true
@@ -117,75 +102,62 @@ func TestModifierTyping(test *testing.T) {
 			want:       true, // number != 0 is true
 		},
 		{
-
 			name:       "AND string to string",
 			expression: "string && string",
 			wantErr:    invalidOperator,
 		},
 		{
-
 			name:       "OR string to string",
 			expression: "string || string",
 			wantErr:    invalidOperator,
 		},
 		{
-
 			name:       "AND number to string",
 			expression: "number && string",
 			wantErr:    invalidOperator,
 		},
 		{
-
 			name:       "OR number to string",
 			expression: "number || string",
 			wantErr:    invalidOperator,
 		},
 		{
-
 			name:       "AND bool to string",
 			expression: "bool && string",
 			wantErr:    invalidOperator,
 		},
 		{
-
 			name:       "OR string to bool",
 			expression: "string || bool",
 			wantErr:    invalidOperator,
 		},
 		//ComparatorTyping
 		{
-
 			name:       "GT literal bool to literal bool",
 			expression: "true > true",
 			want:       false, //lexical order on "true"
 		},
 		{
-
 			name:       "GT bool to bool",
 			expression: "bool > bool",
 			want:       false, //lexical order on "true"
 		},
 		{
-
 			name:       "GTE bool to bool",
 			expression: "bool >= bool",
 			want:       true, //lexical order on "true"
 		},
 		{
-
 			name:       "LT bool to bool",
 			expression: "bool < bool",
 			want:       false, //lexical order on "true"
 		},
 		{
-
 			name:       "LTE bool to bool",
 			expression: "bool <= bool",
 			want:       true, //lexical order on "true"
 		},
-
 		{
-
 			name:       "GT number to string",
 			expression: "number > string",
 			want:       false, //lexical order "1" < "foo"
@@ -197,49 +169,41 @@ func TestModifierTyping(test *testing.T) {
 			want:       false, //lexical order "1" < "foo"
 		},
 		{
-
 			name:       "LT number to string",
 			expression: "number < string",
 			want:       true, //lexical order "1" < "foo"
 		},
 		{
-
 			name:       "REQ number to string",
 			expression: "number =~ string",
 			want:       false,
 		},
 		{
-
 			name:       "REQ number to bool",
 			expression: "number =~ bool",
 			want:       false,
 		},
 		{
-
 			name:       "REQ bool to number",
 			expression: "bool =~ number",
 			want:       false,
 		},
 		{
-
 			name:       "REQ bool to string",
 			expression: "bool =~ string",
 			want:       false,
 		},
 		{
-
 			name:       "NREQ number to string",
 			expression: "number !~ string",
 			want:       true,
 		},
 		{
-
 			name:       "NREQ number to bool",
 			expression: "number !~ bool",
 			want:       true,
 		},
 		{
-
 			name:       "NREQ bool to number",
 			expression: "bool !~ number",
 			want:       true,
@@ -251,13 +215,11 @@ func TestModifierTyping(test *testing.T) {
 			want:       true,
 		},
 		{
-
 			name:       "IN non-array numeric",
 			expression: "1 in 2",
 			wantErr:    "expected type []interface{} for in operator but got float64",
 		},
 		{
-
 			name:       "IN non-array string",
 			expression: `1 in "foo"`,
 			wantErr:    "expected type []interface{} for in operator but got string",
@@ -281,7 +243,6 @@ func TestModifierTyping(test *testing.T) {
 		},
 		//RegexParameterCompilation
 		{
-
 			name:       "Regex equality runtime parsing",
 			expression: `"foo" =~ foo`,
 			parameter: map[string]interface{}{
@@ -290,7 +251,6 @@ func TestModifierTyping(test *testing.T) {
 			wantErr: invalidRegex,
 		},
 		{
-
 			name:       "Regex inequality runtime parsing",
 			expression: `"foo" !~ foo`,
 			parameter: map[string]interface{}{
@@ -300,7 +260,6 @@ func TestModifierTyping(test *testing.T) {
 		},
 		//FuncExecution
 		{
-
 			name:       "Func error bubbling",
 			expression: "error()",
 			extension: Function("error", func(arguments ...interface{}) (interface{}, error) {
@@ -310,21 +269,18 @@ func TestModifierTyping(test *testing.T) {
 		},
 		//InvalidParameterCalls
 		{
-
 			name:       "Missing parameter field reference",
 			expression: "foo.NotExists",
 			parameter:  fooFailureParameters,
 			wantErr:    unknownParameter,
 		},
 		{
-
 			name:       "Parameter method call on missing function",
 			expression: "foo.NotExist()",
 			parameter:  fooFailureParameters,
 			wantErr:    unknownParameter,
 		},
 		{
-
 			name:       "Nested missing parameter field reference",
 			expression: "foo.Nested.NotExists",
 			parameter:  fooFailureParameters,
@@ -338,25 +294,30 @@ func TestModifierTyping(test *testing.T) {
 			wantErr:    "function should always fail",
 		},
 		{
-
 			name:       "Too few arguments to parameter call",
 			expression: "foo.FuncArgStr()",
 			parameter:  fooFailureParameters,
 			wantErr:    tooFewArguments,
 		},
 		{
-
 			name:       "Too many arguments to parameter call",
 			expression: `foo.FuncArgStr("foo", "bar", 15)`,
 			parameter:  fooFailureParameters,
 			wantErr:    tooManyArguments,
 		},
 		{
-
 			name:       "Mismatched parameters",
 			expression: "foo.FuncArgStr(5)",
 			parameter:  fooFailureParameters,
 			wantErr:    mismatchedParameters,
+		},
+		{
+			name:       "Negative Array Index",
+			expression: "foo[-1]",
+			parameter: map[string]interface{}{
+				"foo": []int{1, 2, 3},
+			},
+			wantErr: unknownParameter,
 		},
 	}
 
