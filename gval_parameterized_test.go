@@ -521,6 +521,14 @@ func TestParameterized(t *testing.T) {
 				},
 				want: complex128(0),
 			},
+			{
+				name:       "coalesce with undefined",
+				expression: "fooz ?? foo",
+				parameter: map[string]interface{}{
+					"foo": "bar",
+				},
+				want: "bar",
+			},
 		},
 		t,
 	)
