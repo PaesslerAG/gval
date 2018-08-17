@@ -6,7 +6,7 @@ GVAL_PATH=$HOME/gopath/src/github.com/PaesslerAG/gval
 
 # run the actual tests.
 cd "${GVAL_PATH}"
-go test -bench=. -benchmem -coverprofile coverage.out
+go test -bench=. -benchmem -timeout 10m -coverprofile coverage.out
 status=$?
 
 if [ "${status}" != 0 ];
