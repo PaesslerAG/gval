@@ -85,7 +85,6 @@ func (*Parser) Var(path ...Evaluable) Evaluable {
 
 func variable(path ...Evaluable) Evaluable {
 	return func(c context.Context, v interface{}) (interface{}, error) {
-		//fullname += "." + token
 		keys := make([]string, len(path))
 		for i, p := range path {
 			k, err := p.EvalString(c, v)
@@ -97,12 +96,10 @@ func variable(path ...Evaluable) Evaluable {
 		for i, k := range keys {
 			switch o := v.(type) {
 			case map[string]interface{}:
-				if c, ok := o[k]; ok {
-					v = c
-					continue
-				}
+				v = o[k]
+				continue
 			case []interface{}:
-				if i, err := strconv.Atoi(k); err == nil && len(o) > i {
+				if i, err := strconv.Atoi(k); err == nil && i >= 0 && len(o) > i {
 					v = o[i]
 					continue
 				}
