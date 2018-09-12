@@ -85,7 +85,7 @@ func TestParsingFailure(t *testing.T) {
 			{
 				name:       "Invalid STRING transition",
 				expression: "`foo` `foo`",
-				wantErr:    unexpected(`String`, "operator"),
+				wantErr:    `String while scanning operator`, // can't use func unexpected because the token was changed from String to RawString in go 1.11
 			},
 			{
 				name:       "Invalid operator transition",
