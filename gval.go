@@ -15,7 +15,7 @@ import (
 func Evaluate(expression string, parameter interface{}, opts ...Language) (interface{}, error) {
 	l := full
 	if len(opts) > 0 {
-		l = NewLanguage(append(opts, l)...)
+		l = NewLanguage(append([]Language{l}, opts...)...)
 	}
 	eval, err := l.NewEvaluable(expression)
 	if err != nil {
