@@ -123,7 +123,7 @@ func TestParameterized(t *testing.T) {
 			},
 			{
 
-				name:       "Not-regex against right-hand paramter",
+				name:       "Not-regex against right-hand parameter",
 				expression: `"foobar" !~ foo`,
 				parameter: map[string]interface{}{
 					"foo": "baz"},
@@ -141,7 +141,7 @@ func TestParameterized(t *testing.T) {
 			},
 			{
 
-				name:       "Not-regex against two paramter",
+				name:       "Not-regex against two parameter",
 				expression: "foo !~ bar",
 				parameter: map[string]interface{}{
 					"foo": "foobar",
