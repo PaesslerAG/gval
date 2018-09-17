@@ -3,6 +3,7 @@ Gval
 
 [![Build Status](https://api.travis-ci.org/PaesslerAG/gval.svg?branch=master)](https://travis-ci.org/PaesslerAG/gval)
 [![Godoc](https://godoc.org/github.com/PaesslerAG/gval?status.png)](https://godoc.org/github.com/PaesslerAG/gval)
+[![Go Report Card](https://goreportcard.com/badge/github.com/PaesslerAG/gval)](https://goreportcard.com/report/github.com/PaesslerAG/gval)
 
 Gval (Go eVALuate) provides support for evaluating arbitrary expressions, in particular Go-like expressions.
 
