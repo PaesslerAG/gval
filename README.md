@@ -7,6 +7,8 @@ Gval
 
 Gval (Go eVALuate) provides support for evaluating arbitrary expressions, in particular Go-like expressions.
 
+<img src="./prtg-batmin-gopher.png" alt="gopher" width="200px"/>
+
 Evaluate
 --
 
@@ -136,3 +138,6 @@ Missing Features
 
 - [ ] Expression Formatter (a new Language that formats a expressions)
 - [ ] SQL Expression (a new Language that converts a expression into a SQL expression)
+
+-------------------------------------
+Credits to Reene French for the gophers.
