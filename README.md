@@ -7,7 +7,7 @@ Gval
 
 Gval (Go eVALuate) provides support for evaluating arbitrary expressions, in particular Go-like expressions.
 
-<img src="./prtg-batmin-gopher.png" alt="gopher" width="200px"/>
+![gopher](./prtg-batmin-gopher.png)
 
 Evaluate
 --
