@@ -95,6 +95,9 @@ func variable(path ...Evaluable) Evaluable {
 		}
 		for i, k := range keys {
 			switch o := v.(type) {
+			case map[interface{}]interface{}:
+				v = o[k]
+				continue
 			case map[string]interface{}:
 				v = o[k]
 				continue
