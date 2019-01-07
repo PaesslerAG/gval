@@ -34,23 +34,34 @@ Strings, numbers, and booleans can be used like in Go:
 
 - [(7 < "47" == true ? "hello world!\n\u263a") + \` more text\`](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--Encoding)
 
-## Variables
+## Parameter
 
-Variables are string literals. They can be used for values with string keys if the parameter is a `map[string]interface{}` or `map[interface{}]interface{}` and for fields or methods if the parameter is a struct.
+Variables can be accessed via string literals. They can be used for values with string keys if the parameter is a `map[string]interface{}` or `map[interface{}]interface{}` and for fields or methods if the parameter is a struct.
 
 - [foo > 0](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--Parameter)
 
-### Maps and Arrays
+### Bracket Selector
+
+Map and array elements and Struct Field can be accessed via `[]`.
 
 - [foo[0]](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--Array)
+- [foo["b" + "a" + "r"]](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--ExampleEvaluate_ComplexAccessor)
 
-Parameter names like response-time will be interpreted as response minus time. While gval doesn't support these parameter names directly, you can easily access them via [JSON Path](https://github.com/PaesslerAG/jsonpath):
+### Dot Selector
+
+A nested variable with a name containing only letters and underscores can be accessed via a dot selector.
+
+- [foo.bar > 0](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--NestedParameter)
+
+### Custom Selector
+
+Parameter names like `response-time` will be interpreted as `response` minus `time`. While gval doesn't support these parameter names directly, you can easily access them via a custom extension like [JSON Path](https://github.com/PaesslerAG/jsonpath):
 
 - [$["response-time"]](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--Jsonpath)
 
 Jsonpath is also suitable for accessing array elements.
 
-### Accessors
+### Fields and Methods
 
 If you have structs in your parameters, you can access their fields and methods in the usual way:
 
