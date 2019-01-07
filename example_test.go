@@ -3,7 +3,6 @@ package gval_test
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/PaesslerAG/gval"
@@ -15,12 +14,11 @@ func ExampleEvaluate_basic() {
 	value, err := gval.Evaluate("10 > 0", nil)
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 
 	fmt.Print(value)
 
-	// Output
+	// Output:
 	// true
 }
 
@@ -31,12 +29,11 @@ func ExampleEvaluate_parameter() {
 	})
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 
 	fmt.Print(value)
 
-	// Output
+	// Output:
 	// false
 }
 
@@ -47,13 +44,42 @@ func ExampleEvaluate_nestedParameter() {
 	})
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 
 	fmt.Print(value)
 
-	// Output
+	// Output:
 	// false
+}
+
+func ExampleEvaluate_array() {
+
+	value, err := gval.Evaluate("foo[0]", map[string]interface{}{
+		"foo": []interface{}{-1.},
+	})
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Print(value)
+
+	// Output:
+	// -1
+}
+
+func ExampleEvaluate_complexAccessor() {
+
+	value, err := gval.Evaluate(`foo["b" + "a" + "r"]`, map[string]interface{}{
+		"foo": map[string]interface{}{"bar": -1.},
+	})
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Print(value)
+
+	// Output:
+	// -1
 }
 
 func ExampleEvaluate_arithmetic() {
@@ -65,12 +91,11 @@ func ExampleEvaluate_arithmetic() {
 		})
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 
 	fmt.Print(value)
 
-	// Output
+	// Output:
 	// false
 }
 
@@ -82,13 +107,12 @@ func ExampleEvaluate_string() {
 		})
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 
 	fmt.Print(value)
 
-	// Output
-	// false
+	// Output:
+	// true
 }
 
 func ExampleEvaluate_float64() {
@@ -100,12 +124,11 @@ func ExampleEvaluate_float64() {
 		})
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 
 	fmt.Print(value)
 
-	// Output
+	// Output:
 	// 50
 }
 
@@ -119,28 +142,26 @@ func ExampleEvaluate_dateComparison() {
 			date2, ok2 := b.(time.Time)
 
 			if ok1 && ok2 {
-				return date1.Before(date2), nil
+				return date1.After(date2), nil
 			}
 			return nil, fmt.Errorf("unexpected operands types (%T) > (%T)", a, b)
 		}),
 	)
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 
 	fmt.Print(value)
 
-	// Output
+	// Output:
 	// true
 }
 
 func ExampleEvaluable() {
-	eval, err := gval.Full(gval.Constant("maximum_time", 53)).
+	eval, err := gval.Full(gval.Constant("maximum_time", 52)).
 		NewEvaluable("response_time <= maximum_time")
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 
 	for i := 50; i < 55; i++ {
@@ -149,13 +170,13 @@ func ExampleEvaluable() {
 		})
 		if err != nil {
 			fmt.Println(err)
-			os.Exit(1)
+
 		}
 
 		fmt.Println(value)
 	}
 
-	// Output
+	// Output:
 	// true
 	// true
 	// true
@@ -173,18 +194,17 @@ func ExampleEvaluate_strlen() {
 		}))
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 
 	fmt.Print(value)
 
-	// Output
+	// Output:
 	// false
 }
 
 func ExampleEvaluate_encoding() {
 
-	value, err := gval.Evaluate(`(7 < "47" == true ? "hello world!\n\u263a")`+" + ` more text`",
+	value, err := gval.Evaluate(`(7 < "47" == true ? "hello world!\n\u263a" : "good bye\n")`+" + ` more text`",
 		nil,
 		gval.Function("strlen", func(args ...interface{}) (interface{}, error) {
 			length := len(args[0].(string))
@@ -192,12 +212,11 @@ func ExampleEvaluate_encoding() {
 		}))
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 
 	fmt.Print(value)
 
-	// Output
+	// Output:
 	// hello world!
 	// ☺ more text
 }
@@ -207,7 +226,7 @@ type exampleType struct {
 }
 
 func (e exampleType) World() string {
-	return "wolrd"
+	return "world"
 }
 
 func ExampleEvaluate_accessor() {
@@ -218,13 +237,12 @@ func ExampleEvaluate_accessor() {
 		})
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 
 	fmt.Print(value)
 
-	// Output
-	// hello world!
+	// Output:
+	// hello world
 }
 
 func ExampleEvaluate_flatAccessor() {
@@ -234,32 +252,30 @@ func ExampleEvaluate_flatAccessor() {
 	)
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 
 	fmt.Print(value)
 
-	// Output
-	// hello world!
+	// Output:
+	// hello world
 }
 
 func ExampleEvaluate_nestedAccessor() {
 
-	value, err := gval.Evaluate(`foo.Hello + foo.World()`,
+	value, err := gval.Evaluate(`foo.Bar.Hello + foo.Bar.World()`,
 		map[string]interface{}{
-			"foo": struct{ bar exampleType }{
-				bar: exampleType{Hello: "hello "},
+			"foo": struct{ Bar exampleType }{
+				Bar: exampleType{Hello: "hello "},
 			},
 		})
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 
 	fmt.Print(value)
 
-	// Output
-	// hello world!
+	// Output:
+	// hello world
 }
 
 func ExampleEvaluate_jsonpath() {
@@ -272,12 +288,11 @@ func ExampleEvaluate_jsonpath() {
 	)
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 
 	fmt.Print(value)
 
-	// Output
+	// Output:
 	// 100
 }
 
@@ -301,18 +316,16 @@ func ExampleLanguage() {
 	eval, err := lang.NewEvaluable(`{"foobar": 50} | foobar + 100`)
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 
 	value, err := eval(context.Background(), nil)
 
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 
 	fmt.Println(value)
 
-	// Output
+	// Output:
 	// 150
 }
