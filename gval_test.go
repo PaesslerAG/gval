@@ -58,6 +58,10 @@ func (d dummyParameter) Func2() (string, error) {
 	return "frink", nil
 }
 
+func (d *dummyParameter) PointerFunc() (string, error) {
+	return "point", nil
+}
+
 func (d dummyParameter) FuncErr() (string, error) {
 	return "", fmt.Errorf("fumps")
 }

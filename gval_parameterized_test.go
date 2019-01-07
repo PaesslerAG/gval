@@ -537,6 +537,14 @@ func TestParameterized(t *testing.T) {
 				},
 				want: "bar",
 			},
+			{
+				name:       "method on pointer type",
+				expression: "foo.PointerFunc()",
+				parameter: map[string]interface{}{
+					"foo": &dummyParameter{},
+				},
+				want: "point",
+			},
 		},
 		t,
 	)
