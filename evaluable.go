@@ -108,19 +108,20 @@ func variable(path ...Evaluable) Evaluable {
 				}
 			default:
 				vv := reflect.ValueOf(o)
+				vvElem := vv
 
 				// if this is a pointer, resolve it.
 				if vv.Kind() == reflect.Ptr {
-					vv = vv.Elem()
+					vvElem = vv.Elem()
 				}
 
 				//check generic for maps and arrays
 
-				if vv.Kind() != reflect.Struct {
+				if vvElem.Kind() != reflect.Struct {
 					break
 				}
 
-				field := vv.FieldByName(k)
+				field := vvElem.FieldByName(k)
 				if field.IsValid() {
 					v = field.Interface()
 					continue
