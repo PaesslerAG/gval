@@ -1,5 +1,4 @@
-Gval
-====
+# Gval
 
 [![Build Status](https://api.travis-ci.org/PaesslerAG/gval.svg?branch=master)](https://travis-ci.org/PaesslerAG/gval)
 [![Godoc](https://godoc.org/github.com/PaesslerAG/gval?status.png)](https://godoc.org/github.com/PaesslerAG/gval)
@@ -9,8 +8,7 @@ Gval (Go eVALuate) provides support for evaluating arbitrary expressions, in par
 
 ![gopher](./prtg-batmin-gopher.png)
 
-Evaluate
---
+## Evaluate
 
 Gval can evaluate expressions with parameters, arimethetic, logical, and string operations:
 
@@ -36,17 +34,34 @@ Strings, numbers, and booleans can be used like in Go:
 
 - [(7 < "47" == true ? "hello world!\n\u263a") + \` more text\`](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--Encoding)
 
-Maps and Arrays
---
+## Parameter
 
-Parameter names like response-time will be interpreted as response minus time. While gval doesn't support these parameter names directly, you can easily access them via [JSON Path](https://github.com/PaesslerAG/jsonpath):
+Variables can be accessed via string literals. They can be used for values with string keys if the parameter is a `map[string]interface{}` or `map[interface{}]interface{}` and for fields or methods if the parameter is a struct.
+
+- [foo > 0](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--Parameter)
+
+### Bracket Selector
+
+Map and array elements and Struct Field can be accessed via `[]`.
+
+- [foo[0]](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--Array)
+- [foo["b" + "a" + "r"]](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--ExampleEvaluate_ComplexAccessor)
+
+### Dot Selector
+
+A nested variable with a name containing only letters and underscores can be accessed via a dot selector.
+
+- [foo.bar > 0](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--NestedParameter)
+
+### Custom Selector
+
+Parameter names like `response-time` will be interpreted as `response` minus `time`. While gval doesn't support these parameter names directly, you can easily access them via a custom extension like [JSON Path](https://github.com/PaesslerAG/jsonpath):
 
 - [$["response-time"]](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--Jsonpath)
 
 Jsonpath is also suitable for accessing array elements.
 
-Accessors
---
+### Fields and Methods
 
 If you have structs in your parameters, you can access their fields and methods in the usual way:
 
@@ -57,10 +72,9 @@ It also works if the parameter is a struct directly
 or if the fields are nested
 [foo.Hello + foo.World()](https://godoc.org/github.com/PaesslerAG/gval/#example-Evaluate--NestedAccessor)
 
-This may be convenient but note that using accessors makes the expression about four times slower than just using a parameter (consult the benchmarks for more precise measurements on your system). If there are functions you want to use, it's faster (and probably cleaner) to define them as functions (see the Evaluate section). These approaches use no reflection, and are designed to be fast and clean.
+This may be convenient but note that using accessors on strucs makes the expression about four times slower than just using a parameter (consult the benchmarks for more precise measurements on your system). If there are functions you want to use, it's faster (and probably cleaner) to define them as functions (see the Evaluate section). These approaches use no reflection, and are designed to be fast and clean.
 
-Default Language
---
+## Default Language
 
 - Modifiers: `+` `-` `/` `*` `&` `|` `^` `**` `%` `>>` `<<`
 - Comparators: `>` `>=` `<` `<=` `==` `!=` `=~` `!~`
@@ -78,8 +92,7 @@ Default Language
 
 See [Godoc](https://godoc.org/github.com/PaesslerAG/gval/#Gval) for gval.Language details.
 
-Customize
---
+## Customize
 
 Gval is completly customizable. Every constant, function or operator can be defined separately and existing expressing languages can be reused:
 
@@ -87,8 +100,7 @@ Gval is completly customizable. Every constant, function or operator can be defi
 
 For details see [Godoc](https://godoc.org/github.com/PaesslerAG/gval).
 
-Performance
---
+## Performance
 
 The library is built with the intention of being quick but has not been aggressively profiled and optimized. For most applications, though, it is completely fine.
 If performance is an issue, make sure to create your expression language with all functions, constants and operators only once. Evaluating an expression like gval.Evaluate("expression, const1, func1, func2, ...) creates a new gval.Language everytime it is called and slows execution.
@@ -128,13 +140,11 @@ BenchmarkRandom-4                                                 500000        
 ok
 ```
 
-API Breaks
---
+## API Breaks
 
 The library is designed for API stability but still in beta. Stable releases will explicitly state when an API break happens via an increased the major version number.
 
-Missing Features
---
+## Missing Features
 
 - [ ] Expression Formatter (a new Language that formats a expressions)
 - [ ] SQL Expression (a new Language that converts a expression into a SQL expression)
