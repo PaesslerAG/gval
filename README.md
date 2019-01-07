@@ -140,13 +140,11 @@ BenchmarkRandom-4                                                 500000        
 ok
 ```
 
-API Breaks
---
+## API Breaks
 
 The library is designed for API stability but still in beta. Stable releases will explicitly state when an API break happens via an increased the major version number.
 
-Missing Features
---
+## Missing Features
 
 - [ ] Expression Formatter (a new Language that formats a expressions)
 - [ ] SQL Expression (a new Language that converts a expression into a SQL expression)
