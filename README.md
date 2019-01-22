@@ -1,7 +1,8 @@
 # Gval
 
-[![Build Status](https://api.travis-ci.org/PaesslerAG/gval.svg?branch=master)](https://travis-ci.org/PaesslerAG/gval)
 [![Godoc](https://godoc.org/github.com/PaesslerAG/gval?status.png)](https://godoc.org/github.com/PaesslerAG/gval)
+[![Build Status](https://api.travis-ci.org/PaesslerAG/gval.svg?branch=master)](https://travis-ci.org/PaesslerAG/gval)
+[![Coverage Status](https://coveralls.io/repos/github/PaesslerAG/gval/badge.svg?branch=coveralls)](https://coveralls.io/github/PaesslerAG/gval?branch=coveralls)
 [![Go Report Card](https://goreportcard.com/badge/github.com/PaesslerAG/gval)](https://goreportcard.com/report/github.com/PaesslerAG/gval)
 
 Gval (Go eVALuate) provides support for evaluating arbitrary expressions, in particular Go-like expressions.
