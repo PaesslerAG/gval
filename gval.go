@@ -17,15 +17,7 @@ func Evaluate(expression string, parameter interface{}, opts ...Language) (inter
 	if len(opts) > 0 {
 		l = NewLanguage(append([]Language{l}, opts...)...)
 	}
-	eval, err := l.NewEvaluable(expression)
-	if err != nil {
-		return nil, err
-	}
-	v, err := eval(context.Background(), parameter)
-	if err != nil {
-		return nil, fmt.Errorf("can not evaluate %s: %v", expression, err)
-	}
-	return v, nil
+	return l.Evaluate(expression, parameter)
 }
 
 // Full is the union of Arithmetic, Bitmask, Text, PropositionalLogic, and Json

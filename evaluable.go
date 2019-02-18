@@ -76,22 +76,38 @@ func constant(value interface{}) Evaluable {
 
 //Var Evaluable represents value at given path.
 //It supports:
+//	map[interface{}]interface{},
 //	map[string]interface{},
 // 	[]interface{} and
 //	struct fields
-func (*Parser) Var(path ...Evaluable) Evaluable {
-	return variable(path...)
+func (p *Parser) Var(path ...Evaluable) Evaluable {
+	if p.Language.selector == nil {
+		return variable(path)
+	}
+	return p.Language.selector(path)
 }
 
-func variable(path ...Evaluable) Evaluable {
+// Evaluables is a slice of Evaluable.
+type Evaluables []Evaluable
+
+// EvalStrings evaluates given parameter to a string slice
+func (evs Evaluables) EvalStrings(c context.Context, parameter interface{}) ([]string, error) {
+	strs := make([]string, len(evs))
+	for i, p := range evs {
+		k, err := p.EvalString(c, parameter)
+		if err != nil {
+			return nil, err
+		}
+		strs[i] = k
+	}
+	return strs, nil
+}
+
+func variable(path Evaluables) Evaluable {
 	return func(c context.Context, v interface{}) (interface{}, error) {
-		keys := make([]string, len(path))
-		for i, p := range path {
-			k, err := p.EvalString(c, v)
-			if err != nil {
-				return nil, err
-			}
-			keys[i] = k
+		keys, err := path.EvalStrings(c, v)
+		if err != nil {
+			return nil, err
 		}
 		for i, k := range keys {
 			switch o := v.(type) {

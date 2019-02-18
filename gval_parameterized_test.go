@@ -1,8 +1,10 @@
 package gval
 
 import (
+	"context"
 	"fmt"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 )
@@ -544,6 +546,21 @@ func TestParameterized(t *testing.T) {
 					"foo": &dummyParameter{},
 				},
 				want: "point",
+			},
+			{
+				name:       "custom selector",
+				expression: "hello.world",
+				parameter:  "!",
+				extension: NewLanguage(Base(), VariableSelector(func(path Evaluables) Evaluable {
+					return func(c context.Context, v interface{}) (interface{}, error) {
+						keys, err := path.EvalStrings(c, v)
+						if err != nil {
+							return nil, err
+						}
+						return fmt.Sprintf("%s%s", strings.Join(keys, " "), v), nil
+					}
+				})),
+				want: "hello world!",
 			},
 		},
 		t,

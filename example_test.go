@@ -3,6 +3,7 @@ package gval_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/PaesslerAG/gval"
@@ -276,6 +277,29 @@ func ExampleEvaluate_nestedAccessor() {
 
 	// Output:
 	// hello world
+}
+
+func ExampleVariableSelector() {
+	value, err := gval.Evaluate(`hello.world`, 
+	"!",
+	gval.VariableSelector(func(path gval.Evaluables) gval.Evaluable {
+		return func(c context.Context, v interface{}) (interface{}, error) {
+			keys, err := path.EvalStrings(c, v)
+			if err != nil {
+				return nil, err
+			}
+			return fmt.Sprintf("%s%s", strings.Join(keys, " "), v), nil
+		}
+	}),
+)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Print(value)
+
+	// Output:
+	// hello world!
 }
 
 func ExampleEvaluate_jsonpath() {
