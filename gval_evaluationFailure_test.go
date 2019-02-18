@@ -5,6 +5,7 @@ package gval
 */
 import (
 	"errors"
+	"fmt"
 	"testing"
 )
 
@@ -318,6 +319,14 @@ func TestModifierTyping(test *testing.T) {
 				"foo": []int{1, 2, 3},
 			},
 			wantErr: unknownParameter,
+		},
+		{
+			name:       "invalid selector",
+			expression: "hello[world()]",
+			extension: NewLanguage(Base(), Function("world", func() (int, error) {
+				return 0, fmt.Errorf("test error")
+			})),
+			wantErr: "test error",
 		},
 	}
 

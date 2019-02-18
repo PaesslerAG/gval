@@ -12,6 +12,7 @@ type Language struct {
 	prefixes        map[interface{}]prefix
 	operators       map[string]operator
 	operatorSymbols map[rune]struct{}
+	selector        func(Evaluables) Evaluable
 }
 
 // NewLanguage returns the union of given Languages as new Language.
@@ -27,6 +28,9 @@ func NewLanguage(bases ...Language) Language {
 		}
 		for i := range base.operatorSymbols {
 			l.operatorSymbols[i] = struct{}{}
+		}
+		if base.selector != nil {
+			l.selector = base.selector
 		}
 	}
 	return l
@@ -63,7 +67,11 @@ func (l Language) Evaluate(expression string, parameter interface{}) (interface{
 	if err != nil {
 		return nil, err
 	}
-	return eval(context.Background(), parameter)
+	v, err := eval(context.Background(), parameter)
+	if err != nil {
+		return nil, fmt.Errorf("can not evaluate %s: %v", expression, err)
+	}
+	return v, nil
 }
 
 // Function returns a Language with given function.
@@ -219,4 +227,12 @@ func (l *Language) makeInfixKey(key string) string {
 		l.operatorSymbols[r] = struct{}{}
 	}
 	return key
+}
+
+// VariableSelector returns a Language which uses given variable selector.
+// It must be combined with a Language that uses the vatiable selector. E.g. gval.Base().
+func VariableSelector(selector func(path Evaluables) Evaluable) Language {
+	l := newLanguage()
+	l.selector = selector
+	return l
 }
