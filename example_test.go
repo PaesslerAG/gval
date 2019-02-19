@@ -280,18 +280,18 @@ func ExampleEvaluate_nestedAccessor() {
 }
 
 func ExampleVariableSelector() {
-	value, err := gval.Evaluate(`hello.world`, 
-	"!",
-	gval.VariableSelector(func(path gval.Evaluables) gval.Evaluable {
-		return func(c context.Context, v interface{}) (interface{}, error) {
-			keys, err := path.EvalStrings(c, v)
-			if err != nil {
-				return nil, err
+	value, err := gval.Evaluate(`hello.world`,
+		"!",
+		gval.VariableSelector(func(path gval.Evaluables) gval.Evaluable {
+			return func(c context.Context, v interface{}) (interface{}, error) {
+				keys, err := path.EvalStrings(c, v)
+				if err != nil {
+					return nil, err
+				}
+				return fmt.Sprintf("%s%s", strings.Join(keys, " "), v), nil
 			}
-			return fmt.Sprintf("%s%s", strings.Join(keys, " "), v), nil
-		}
-	}),
-)
+		}),
+	)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -300,6 +300,44 @@ func ExampleVariableSelector() {
 
 	// Output:
 	// hello world!
+}
+
+func ExampleEvaluable_EvalInt() {
+	eval, err := gval.Full().NewEvaluable("1 + x")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	value, err := eval.EvalInt(context.Background(), map[string]interface{}{"x": 5})
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Print(value)
+
+	// Output:
+	// 6
+}
+
+func ExampleEvaluable_EvalBool() {
+	eval, err := gval.Full().NewEvaluable("1 == x")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	value, err := eval.EvalBool(context.Background(), map[string]interface{}{"x": 1})
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if value{
+		fmt.Print("yeah")
+	}
+
+	// Output:
+	// yeah
 }
 
 func ExampleEvaluate_jsonpath() {
