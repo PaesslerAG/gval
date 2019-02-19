@@ -9,7 +9,4 @@ script:
 - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 - go test -bench=Random -benchtime 5m -timeout 30m -benchmem -coverprofile coverage.out
 
-go:
-  - "1.9"
-  - "1.10"
-  - "1.11"
+go: "1.11"
