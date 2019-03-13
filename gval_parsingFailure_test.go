@@ -118,6 +118,12 @@ func TestParsingFailure(t *testing.T) {
 			},
 			{
 
+				name:       "Constant unmatch regex pattern fail to compile",
+				expression: "foo !~ `[abc`",
+				wantErr:    string(syntax.ErrMissingBracket),
+			},
+			{
+
 				name:       "Unbalanced parentheses",
 				expression: "10 > (1 + 50",
 				wantErr:    unexpected(`EOF`, "parentheses"),

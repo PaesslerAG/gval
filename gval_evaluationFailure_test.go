@@ -1,7 +1,7 @@
 package gval
 
 /*
-  Tests to make sure evaluation fails in the expected ways.
+	Tests to make sure evaluation fails in the expected ways.
 */
 import (
 	"errors"
@@ -17,6 +17,7 @@ func TestModifierTyping(test *testing.T) {
 		tooFewArguments      = "reflect: Call with too few input arguments"
 		tooManyArguments     = "reflect: Call with too many input arguments"
 		mismatchedParameters = "reflect: Call using"
+		custom               = "test error"
 	)
 	evaluationTests := []evaluationTest{
 		//ModifierTyping
@@ -259,6 +260,26 @@ func TestModifierTyping(test *testing.T) {
 			},
 			wantErr: invalidRegex,
 		},
+		{
+			name:       "Regex equality runtime right side evaluation",
+			expression: `"foo" =~ error()`,
+			wantErr:    custom,
+		},
+		{
+			name:       "Regex inequality runtime right side evaluation",
+			expression: `"foo" !~ error()`,
+			wantErr:    custom,
+		},
+		{
+			name:       "Regex equality runtime left side evaluation",
+			expression: `error() =~ "."`,
+			wantErr:    custom,
+		},
+		{
+			name:       "Regex inequality runtime left side evaluation",
+			expression: `error() !~ "."`,
+			wantErr:    custom,
+		},
 		//FuncExecution
 		{
 			name:       "Func error bubbling",
@@ -336,6 +357,9 @@ func TestModifierTyping(test *testing.T) {
 				"number": 1,
 				"string": "foo",
 				"bool":   true,
+				"error": func() (int, error) {
+					return 0, fmt.Errorf("test error")
+				},
 			}
 		}
 	}
