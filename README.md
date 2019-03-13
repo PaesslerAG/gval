@@ -77,6 +77,8 @@ This may be convenient but note that using accessors on strucs makes the express
 
 ## Default Language
 
+The default language is in serveral sub languages like text, arithmetic or propositional logic defined. See [Godoc](https://godoc.org/github.com/PaesslerAG/gval/#Gval) for details. All sub languages are merged into gval.Full which contains the following elements:
+
 - Modifiers: `+` `-` `/` `*` `&` `|` `^` `**` `%` `>>` `<<`
 - Comparators: `>` `>=` `<` `<=` `==` `!=` `=~` `!~`
 - Logical ops: `||` `&&`
@@ -91,15 +93,20 @@ This may be convenient but note that using accessors on strucs makes the express
 - Ternary conditional: `?` `:`
 - Null coalescence: `??`
 
-See [Godoc](https://godoc.org/github.com/PaesslerAG/gval/#Gval) for gval.Language details.
-
 ## Customize
 
-Gval is completly customizable. Every constant, function or operator can be defined separately and existing expressing languages can be reused:
+Gval is completly customizable. Every constant, function or operator can be defined separately and existing expression languages can be reused:
 
 - [foo.Hello + foo.World()](https://godoc.org/github.com/PaesslerAG/gval/#example-Language)
 
 For details see [Godoc](https://godoc.org/github.com/PaesslerAG/gval).
+
+### External gval Languages
+
+A list of external libraries for gval. Feel free to add your own library.
+
+- [gvalstrings](https://github.com/generikvault/gvalstrings) parse single quoted strings in gval.
+- [jsonpath](https://github.com/PaesslerAG/jsonpath) full support for jsonpath in gval.
 
 ## Performance
 
@@ -144,11 +151,6 @@ ok
 ## API Breaks
 
 The library is designed for API stability but still in beta. Stable releases will explicitly state when an API break happens via an increased the major version number.
-
-## Missing Features
-
-- [ ] Expression Formatter (a new Language that formats a expressions)
-- [ ] SQL Expression (a new Language that converts a expression into a SQL expression)
 
 -------------------------------------
 Credits to Reene French for the gophers.
