@@ -1,5 +1,8 @@
-// Package gval provides a generic expression language with concrete language instances of several basic languages.
-// In gval base language, an Operator involves either unicode letters or unicode punctuations and unicode symbols.
+// Package gval provides a generic expression language.
+// All functions, infix and prefix operators can be replaced by composing languages into a new one.
+//
+// The package contains concrete expression languages for common application in text, arithmetic, propositional logic and so on.
+// They can be used as basis for a custom expression language or to evaluate expressions directly.
 package gval
 
 import (
