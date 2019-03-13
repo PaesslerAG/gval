@@ -625,26 +625,29 @@ func TestNoParameter(t *testing.T) {
 			{
 				name:       "Object negativ value",
 				expression: `{1: -1,"hello" : "hey"}`,
-				extension: Function("ten", func(arguments ...interface{}) (interface{}, error) {
-					return 10.0, nil
-				}),
-				want: map[string]interface{}{"1": -1., "hello": "hey"},
+				want:       map[string]interface{}{"1": -1., "hello": "hey"},
 			},
 			{
 				name:       "Empty Array",
 				expression: `[]`,
-				extension: Function("ten", func(arguments ...interface{}) (interface{}, error) {
-					return 10.0, nil
-				}),
-				want: []interface{}{},
+				want:       []interface{}{},
 			},
 			{
 				name:       "Empty Object",
 				expression: `{}`,
-				extension: Function("ten", func(arguments ...interface{}) (interface{}, error) {
-					return 10.0, nil
+				want:       map[string]interface{}{},
+			},
+			{
+				name:       "Variadic",
+				expression: `sum(1,2,3,4)`,
+				extension: Function("sum", func(arguments ...float64) (interface{}, error) {
+					sum := 0.
+					for _, a := range arguments {
+						sum += a
+					}
+					return sum, nil
 				}),
-				want: map[string]interface{}{},
+				want: 10.0,
 			},
 		},
 		t,
