@@ -1,6 +1,10 @@
 package gval
 
-import "testing"
+import (
+	"context"
+	"fmt"
+	"testing"
+)
 
 func TestNoParameter(t *testing.T) {
 	testEvaluate(
@@ -648,6 +652,28 @@ func TestNoParameter(t *testing.T) {
 					return sum, nil
 				}),
 				want: 10.0,
+			},
+			{
+				name:       "Ident Operator",
+				expression: `1 plus 1`,
+				extension: InfixNumberOperator("plus", func(a, b float64) (interface{}, error) {
+					return a + b, nil
+				}),
+				want: 2.0,
+			},
+			{
+				name:       "Postfix Operator",
+				expression: `4§`,
+				extension: PostfixOperator("§", func(_ context.Context, _ *Parser, eval Evaluable) (Evaluable, error) {
+					return func(ctx context.Context, parameter interface{}) (interface{}, error) {
+						i, err := eval.EvalInt(ctx, parameter)
+						if err != nil {
+							return nil, err
+						}
+						return fmt.Sprintf("§%d", i), nil
+					}, nil
+				}),
+				want: "§4",
 			},
 		},
 		t,
