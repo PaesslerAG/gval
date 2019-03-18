@@ -159,10 +159,10 @@ func PrefixOperator(name string, e Evaluable) Language {
 	return l
 }
 
-// PostfixOperator extends a Language
+// PostfixOperator extends a Language.
 func PostfixOperator(name string, ext func(context.Context, *Parser, Evaluable) (Evaluable, error)) Language {
 	l := newLanguage()
-	l.operators[name] = postfix{
+	l.operators[l.makeInfixKey(name)] = postfix{
 		f: func(c context.Context, p *Parser, eval Evaluable, pre operatorPrecedence) (Evaluable, error) {
 			return ext(c, p, eval)
 		},

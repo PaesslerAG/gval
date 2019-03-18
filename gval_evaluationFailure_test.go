@@ -309,7 +309,6 @@ func TestModifierTyping(test *testing.T) {
 			wantErr:    unknownParameter,
 		},
 		{
-
 			name:       "Parameter method call returns error",
 			expression: "foo.AlwaysFail()",
 			parameter:  fooFailureParameters,
