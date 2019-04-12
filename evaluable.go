@@ -131,7 +131,35 @@ func variable(path Evaluables) Evaluable {
 					vvElem = vv.Elem()
 				}
 
-				//check generic for maps and arrays
+				if vvElem.Kind() == reflect.Map {
+					vvElem = vv.MapIndex(reflect.ValueOf(k))
+
+					if vvElem.Kind() == reflect.Ptr {
+						vvElem = vvElem.Elem()
+					}
+
+					v = vvElem.Interface()
+
+					continue
+				}
+
+				if vvElem.Kind() == reflect.Slice {
+					i, err := strconv.Atoi(k)
+
+					if err != nil {
+						continue
+					}
+
+					vvElem = vv.Index(i)
+
+					if vvElem.Kind() == reflect.Ptr {
+						vvElem = vvElem.Elem()
+					}
+
+					v = vvElem.Interface()
+
+					continue
+				}
 
 				if vvElem.Kind() != reflect.Struct {
 					break
@@ -207,7 +235,7 @@ func (*Parser) callEvaluable(fullname string, fun Evaluable, args ...Evaluable) 
 		}
 
 		errorInterface := reflect.TypeOf((*error)(nil)).Elem()
-		if len(r) > 0 && ff.Type().Out(len(r)-1).Implements(errorInterface) {
+		if len(r) > 0 && ff.Type().Out(len(r) - 1).Implements(errorInterface) {
 			if r[len(r)-1] != nil {
 				err = r[len(r)-1].(error)
 			}
