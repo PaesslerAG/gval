@@ -138,27 +138,25 @@ func variable(path Evaluables) Evaluable {
 						vvElem = vvElem.Elem()
 					}
 
-					v = vvElem.Interface()
+					if vvElem.IsValid() {
+						v = vvElem.Interface()
 
-					continue
+						continue
+					}
 				}
 
 				if vvElem.Kind() == reflect.Slice {
-					i, err := strconv.Atoi(k)
+					if i, err := strconv.Atoi(k); err == nil && i >= 0 && vv.Len() > i {
+						vvElem = vv.Index(i)
 
-					if err != nil {
+						if vvElem.Kind() == reflect.Ptr {
+							vvElem = vvElem.Elem()
+						}
+
+						v = vvElem.Interface()
+
 						continue
 					}
-
-					vvElem = vv.Index(i)
-
-					if vvElem.Kind() == reflect.Ptr {
-						vvElem = vvElem.Elem()
-					}
-
-					v = vvElem.Interface()
-
-					continue
 				}
 
 				if vvElem.Kind() != reflect.Struct {

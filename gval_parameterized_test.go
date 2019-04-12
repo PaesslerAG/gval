@@ -449,6 +449,18 @@ func TestParameterized(t *testing.T) {
 				want:       "funkalicious",
 			},
 			{
+				name:       "Nested map call",
+				expression: `foo.Nested.Map["a"]`,
+				parameter:  map[string]interface{}{"foo": foo},
+				want:       1,
+			},
+			{
+				name:       "Nested slice call",
+				expression: `foo.Nested.Slice[1]`,
+				parameter:  map[string]interface{}{"foo": foo},
+				want:       2,
+			},
+			{
 
 				name:       "Parameter call with + modifier",
 				expression: "1 + foo.Int",
