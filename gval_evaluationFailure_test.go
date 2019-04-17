@@ -341,6 +341,18 @@ func TestModifierTyping(test *testing.T) {
 			wantErr: unknownParameter,
 		},
 		{
+			name:       "Nested slice call index out of bound",
+			expression: `foo.Nested.Slice[10]`,
+			parameter:  map[string]interface{}{"foo": foo},
+			wantErr:    unknownParameter,
+		},
+		{
+			name:       "Nested map call missing key",
+			expression: `foo.Nested.Map["d"]`,
+			parameter:  map[string]interface{}{"foo": foo},
+			wantErr:    unknownParameter,
+		},
+		{
 			name:       "invalid selector",
 			expression: "hello[world()]",
 			extension: NewLanguage(Base(), Function("world", func() (int, error) {

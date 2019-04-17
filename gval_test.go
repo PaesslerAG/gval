@@ -75,7 +75,9 @@ func (d dummyParameter) AlwaysFail() (interface{}, error) {
 }
 
 type dummyNestedParameter struct {
-	Funk string
+	Funk  string
+	Map   map[string]int
+	Slice []int
 }
 
 func (d dummyNestedParameter) Dunk(arg1 string) string {
@@ -88,7 +90,9 @@ var foo = dummyParameter{
 	BoolFalse: false,
 	Nil:       nil,
 	Nested: dummyNestedParameter{
-		Funk: "funkalicious",
+		Funk:  "funkalicious",
+		Map:   map[string]int{"a": 1, "b": 2, "c": 3},
+		Slice: []int{1, 2, 3},
 	},
 }
 
