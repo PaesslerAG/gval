@@ -576,6 +576,14 @@ func TestParameterized(t *testing.T) {
 				})),
 				want: "hello world!",
 			},
+			{
+				name:       "int keys",
+				expression: `a[0] + a[2]`,
+				parameter: map[string]interface{}{
+					"a": map[int]int{0: 1, 2: 1},
+				},
+				want: 2.,
+			},
 		},
 		t,
 	)
