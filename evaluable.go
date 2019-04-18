@@ -75,11 +75,14 @@ func constant(value interface{}) Evaluable {
 }
 
 //Var Evaluable represents value at given path.
-//It supports:
+//It supports with default language VariableSelector:
 //	map[interface{}]interface{},
-//	map[string]interface{},
-// 	[]interface{} and
-//	struct fields
+//	map[string]interface{} and
+// 	[]interface{} and via reflect
+//	struct fields,
+//	struct methods,
+//	slices and
+//  map with int or string key.
 func (p *Parser) Var(path ...Evaluable) Evaluable {
 	if p.Language.selector == nil {
 		return variable(path)
@@ -123,62 +126,70 @@ func variable(path Evaluables) Evaluable {
 					continue
 				}
 			default:
-				vv := reflect.ValueOf(o)
-				vvElem := vv
-
-				// if this is a pointer, resolve it.
-				if vv.Kind() == reflect.Ptr {
-					vvElem = vv.Elem()
-				}
-
-				if vvElem.Kind() == reflect.Map {
-					vvElem = vv.MapIndex(reflect.ValueOf(k))
-
-					if vvElem.Kind() == reflect.Ptr {
-						vvElem = vvElem.Elem()
-					}
-
-					if vvElem.IsValid() {
-						v = vvElem.Interface()
-
-						continue
-					}
-				}
-
-				if vvElem.Kind() == reflect.Slice {
-					if i, err := strconv.Atoi(k); err == nil && i >= 0 && vv.Len() > i {
-						vvElem = vv.Index(i)
-
-						if vvElem.Kind() == reflect.Ptr {
-							vvElem = vvElem.Elem()
-						}
-
-						v = vvElem.Interface()
-
-						continue
-					}
-				}
-
-				if vvElem.Kind() != reflect.Struct {
-					break
-				}
-
-				field := vvElem.FieldByName(k)
-				if field.IsValid() {
-					v = field.Interface()
-					continue
-				}
-
-				method := vv.MethodByName(k)
-				if method.IsValid() {
-					v = method.Interface()
-					continue
+				var ok bool
+				v, ok = reflectSelect(k, o)
+				if !ok {
+					return nil, fmt.Errorf("unknown parameter %s", strings.Join(keys[:i+1], "."))
 				}
 			}
-			return nil, fmt.Errorf("unknown parameter %s", strings.Join(keys[:i+1], "."))
 		}
 		return v, nil
 	}
+}
+
+func reflectSelect(key string, value interface{}) (selection interface{}, ok bool) {
+	vv := reflect.ValueOf(value)
+	vvElem := resolvePotentialPointer(vv)
+
+	switch vvElem.Kind() {
+	case reflect.Map:
+		mapKey, ok := reflectConvertTo(vv.Type().Key().Kind(), key)
+		if !ok {
+			return nil, false
+		}
+
+		vvElem = vv.MapIndex(reflect.ValueOf(mapKey))
+		vvElem = resolvePotentialPointer(vvElem)
+
+		if vvElem.IsValid() {
+			return vvElem.Interface(), true
+		}
+	case reflect.Slice:
+		if i, err := strconv.Atoi(key); err == nil && i >= 0 && vv.Len() > i {
+			vvElem = resolvePotentialPointer(vv.Index(i))
+			return vvElem.Interface(), true
+		}
+	case reflect.Struct:
+		field := vvElem.FieldByName(key)
+		if field.IsValid() {
+			return field.Interface(), true
+		}
+
+		method := vv.MethodByName(key)
+		if method.IsValid() {
+			return method.Interface(), true
+		}
+	}
+	return nil, false
+}
+
+func resolvePotentialPointer(value reflect.Value) reflect.Value {
+	if value.Kind() == reflect.Ptr {
+		return value.Elem()
+	}
+	return value
+}
+
+func reflectConvertTo(k reflect.Kind, value string) (interface{}, bool) {
+	switch k {
+	case reflect.String:
+		return value, true
+	case reflect.Int:
+		if i, err := strconv.Atoi(value); err == nil {
+			return i, true
+		}
+	}
+	return nil, false
 }
 
 func (*Parser) callFunc(fun function, args ...Evaluable) Evaluable {
@@ -233,7 +244,7 @@ func (*Parser) callEvaluable(fullname string, fun Evaluable, args ...Evaluable) 
 		}
 
 		errorInterface := reflect.TypeOf((*error)(nil)).Elem()
-		if len(r) > 0 && ff.Type().Out(len(r) - 1).Implements(errorInterface) {
+		if len(r) > 0 && ff.Type().Out(len(r)-1).Implements(errorInterface) {
 			if r[len(r)-1] != nil {
 				err = r[len(r)-1].(error)
 			}
