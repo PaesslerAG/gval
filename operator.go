@@ -112,7 +112,10 @@ type opFunc func(a, b interface{}) (interface{}, error)
 func getStringOpFunc(s func(a, b string) (interface{}, error), f opFunc, typeConversion bool) opFunc {
 	if typeConversion {
 		return func(a, b interface{}) (interface{}, error) {
-			return s(fmt.Sprintf("%v", a), fmt.Sprintf("%v", b))
+			if a != nil && b != nil {
+				return s(fmt.Sprintf("%v", a), fmt.Sprintf("%v", b))
+			}
+			return f(a, b)
 		}
 	}
 	return func(a, b interface{}) (interface{}, error) {
