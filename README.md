@@ -150,7 +150,7 @@ ok
 
 ## API Breaks
 
-The library is designed for API stability but still in beta. Stable releases will explicitly state when an API break happens via an increased the major version number.
+Gval is designed with easy expandability in mind and API breaks will be avoided if possible. If API breaks are unavoidable they wil be explicitly stated via an increased major version number.
 
 -------------------------------------
 Credits to Reene French for the gophers.
