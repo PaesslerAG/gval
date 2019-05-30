@@ -62,8 +62,14 @@ func createCallArguments(t reflect.Type, args []interface{}) ([]reflect.Value, e
 		} else if i == numIn-1 {
 			inType = t.In(numIn - 1).Elem()
 		}
-		argVal := reflect.ValueOf(arg)
-		if arg == nil || !argVal.Type().AssignableTo(inType) {
+
+		var argVal reflect.Value
+		if arg == nil {
+			argVal = reflect.Zero(t.In(i))
+		} else {
+			argVal = reflect.ValueOf(arg)
+		}
+		if !argVal.Type().AssignableTo(inType) {
 			return nil, fmt.Errorf("expected type %s for parameter %d but got %T",
 				inType.String(), i, arg)
 		}

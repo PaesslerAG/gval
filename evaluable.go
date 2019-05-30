@@ -233,7 +233,11 @@ func (*Parser) callEvaluable(fullname string, fun Evaluable, args ...Evaluable) 
 			if err != nil {
 				return nil, err
 			}
-			a[i] = reflect.ValueOf(arg)
+			if arg == nil {
+				a[i] = reflect.Zero(ff.Type().In(i))
+			} else {
+				a[i] = reflect.ValueOf(arg)
+			}
 		}
 
 		rr := ff.Call(a)

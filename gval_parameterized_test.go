@@ -592,6 +592,36 @@ func TestParameterized(t *testing.T) {
 				},
 				want: 1.,
 			},
+			{
+				name:       "nil argument of function in parameter",
+				expression: "fn.isNil(hello.world)",
+				parameter: map[string]interface{}{
+					"hello": map[string]interface{}{
+						"world": nil,
+					},
+					"fn": map[string]interface{}{
+						"isNil": func(arg interface{}) bool {
+							return arg == nil
+						},
+					},
+				},
+				want: true,
+			},
+			{
+				name:       "nil argument of function in language",
+				expression: "isNil(hello.world)",
+				parameter: map[string]interface{}{
+					"hello": map[string]interface{}{
+						"world": nil,
+					},
+				},
+				extension: NewLanguage(
+					Function("isNil", func(arg interface{}) (interface{}, error) {
+						return arg == nil, nil
+					}),
+				),
+				want: true,
+			},
 		},
 		t,
 	)
