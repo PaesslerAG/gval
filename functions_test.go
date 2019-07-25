@@ -1,9 +1,11 @@
 package gval
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func Test_toFunc(t *testing.T) {
@@ -114,10 +116,26 @@ func Test_toFunc(t *testing.T) {
 			want:    []interface{}{false, "", 0},
 			wantErr: myError,
 		},
+		{
+			name: "context not expiring",
+			function: func(ctx context.Context) error {
+				return nil
+			},
+		},
+		{
+			name: "context expires",
+			function: func(ctx context.Context) error {
+				time.Sleep(20 * time.Millisecond)
+				return nil
+			},
+			wantErr: context.DeadlineExceeded,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := toFunc(tt.function)(tt.arguments...)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+			got, err := toFunc(tt.function)(ctx, tt.arguments...)
+			cancel()
 
 			if tt.wantAnyErr {
 				if err != nil {
