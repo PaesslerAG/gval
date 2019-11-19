@@ -8,21 +8,113 @@ import (
 	"unicode"
 )
 
+type parserLang struct {
+	lang            Language
+	prevWhitespace  uint64
+	prevMode        uint
+	prevIsIdentRune func(ch rune, i int) bool
+}
+
+type parserLangStack []parserLang
+
+func (pls *parserLangStack) push(pl parserLang) {
+	*pls = append(*pls, pl)
+}
+
+func (pls parserLangStack) peek() (parserLang, bool) {
+	if len(pls) == 0 {
+		return parserLang{}, false
+	}
+
+	return pls[len(pls)-1], true
+}
+
+func (pls *parserLangStack) pop() (parserLang, bool) {
+	pl, ok := pls.peek()
+	if !ok {
+		return parserLang{}, false
+	}
+
+	*pls = (*pls)[:len(*pls)-1]
+	return pl, true
+}
+
 //Parser parses expressions in a Language into an Evaluable
 type Parser struct {
-	scanner scanner.Scanner
-	Language
+	scanner    scanner.Scanner
+	langs      parserLangStack
 	lastScan   rune
 	camouflage error
 }
 
-func newParser(expression string, l Language) *Parser {
+func newParser(expression string) *Parser {
 	sc := scanner.Scanner{}
 	sc.Init(strings.NewReader(expression))
 	sc.Error = func(*scanner.Scanner, string) { return }
-	sc.IsIdentRune = func(r rune, pos int) bool { return unicode.IsLetter(r) || r == '_' || (pos > 0 && unicode.IsDigit(r)) }
 	sc.Filename = expression + "\t"
-	return &Parser{scanner: sc, Language: l}
+	return &Parser{scanner: sc}
+}
+
+func (p *Parser) currentLanguage() Language {
+	pl, ok := p.langs.peek()
+	if !ok {
+		return Language{}
+	}
+
+	return pl.lang
+}
+
+func (p *Parser) pushLanguage(l Language) {
+	if p.isCamouflaged() {
+		panic("can not pushLanguage() on camouflaged Parser")
+	}
+
+	pl := parserLang{
+		lang:            l,
+		prevWhitespace:  p.scanner.Whitespace,
+		prevMode:        p.scanner.Mode,
+		prevIsIdentRune: p.scanner.IsIdentRune,
+	}
+	p.langs.push(pl)
+
+	p.scanner.Whitespace = scanner.GoWhitespace
+	p.scanner.Mode = scanner.GoTokens
+	p.scanner.IsIdentRune = func(r rune, pos int) bool { return unicode.IsLetter(r) || r == '_' || (pos > 0 && unicode.IsDigit(r)) }
+}
+
+func (p *Parser) popLanguage() error {
+	pl, ok := p.langs.pop()
+	if !ok {
+		return fmt.Errorf("no language to pop")
+	}
+
+	p.scanner.Whitespace = pl.prevWhitespace
+	p.scanner.Mode = pl.prevMode
+	p.scanner.IsIdentRune = pl.prevIsIdentRune
+
+	return nil
+}
+
+// SetWhitespace sets the behavior of the whitespace matcher. The given
+// characters must be less than or equal to 0x20 (' ').
+func (p *Parser) SetWhitespace(chars ...rune) {
+	var mask uint64
+	for _, char := range chars {
+		mask |= 1 << char
+	}
+
+	p.scanner.Whitespace = mask
+}
+
+// SetMode sets the tokens that the underlying scanner will match.
+func (p *Parser) SetMode(mode uint) {
+	p.scanner.Mode = mode
+}
+
+// SetIsIdentRuneFunc sets the function that matches ident characters in the
+// underlying scanner.
+func (p *Parser) SetIsIdentRuneFunc(fn func(ch rune, i int) bool) {
+	p.scanner.IsIdentRune = fn
 }
 
 // Scan reads the next token or Unicode character from source and returns it.

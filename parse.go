@@ -31,9 +31,14 @@ func (p *Parser) ParseExpression(c context.Context) (eval Evaluable, err error) 
 
 //ParseNextExpression scans the expression ignoring following operators
 func (p *Parser) ParseNextExpression(c context.Context) (eval Evaluable, err error) {
+	l := p.currentLanguage()
+
 	scan := p.Scan()
-	ex, ok := p.prefixes[scan]
+	ex, ok := l.prefixes[scan]
 	if !ok {
+		if scan != scanner.EOF && l.alternate != nil {
+			return l.alternate(c, p)
+		}
 		return nil, p.Expected("extensions")
 	}
 	return ex(c, p)
@@ -69,13 +74,15 @@ func parseParentheses(c context.Context, p *Parser) (Evaluable, error) {
 }
 
 func (p *Parser) parseOperator(c context.Context, stack *stageStack, eval Evaluable) (st stage, err error) {
+	l := p.currentLanguage()
+
 	for {
 		scan := p.Scan()
 		op := p.TokenText()
 		mustOp := false
-		if p.isSymbolOperation(scan) {
+		if l.isSymbolOperation(scan) {
 			scan = p.Peek()
-			for p.isSymbolOperation(scan) {
+			for l.isSymbolOperation(scan) {
 				mustOp = true
 				op += string(scan)
 				p.Next()
@@ -85,7 +92,7 @@ func (p *Parser) parseOperator(c context.Context, stack *stageStack, eval Evalua
 			p.Camouflage("operator")
 			return stage{Evaluable: eval}, nil
 		}
-		operator, _ := p.operators[op]
+		operator, _ := l.operators[op]
 		switch operator := operator.(type) {
 		case *infix:
 			return stage{

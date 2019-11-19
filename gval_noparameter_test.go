@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"text/scanner"
 )
 
 func TestNoParameter(t *testing.T) {
@@ -674,6 +675,115 @@ func TestNoParameter(t *testing.T) {
 					}, nil
 				}),
 				want: "§4",
+			},
+			{
+				name:       "Tabs as non-whitespace",
+				expression: "4\t5\t6",
+				extension: NewLanguage(
+					Init(func(ctx context.Context, p *Parser) (Evaluable, error) {
+						p.SetWhitespace('\n', '\r', ' ')
+						return p.ParseExpression(ctx)
+					}),
+					InfixNumberOperator("\t", func(a, b float64) (interface{}, error) {
+						return a * b, nil
+					}),
+				),
+				want: 120.0,
+			},
+			{
+				name:       "Handle all other prefixes",
+				expression: "^foo + $bar + &baz",
+				extension: Alternate(func(ctx context.Context, p *Parser) (Evaluable, error) {
+					var mul int
+					switch p.TokenText() {
+					case "^":
+						mul = 1
+					case "$":
+						mul = 2
+					case "&":
+						mul = 3
+					}
+
+					switch p.Scan() {
+					case scanner.Ident:
+						return p.Const(mul * len(p.TokenText())), nil
+					default:
+						return nil, p.Expected("length multiplier", scanner.Ident)
+					}
+				}),
+				want: 18.0,
+			},
+			{
+				name:       "Embed languages",
+				expression: "left { 5 + 5 } right",
+				extension: func() Language {
+					step := func(ctx context.Context, p *Parser, cur Evaluable) (Evaluable, error) {
+						next, err := p.ParseExpression(ctx)
+						if err != nil {
+							return nil, err
+						}
+
+						return func(ctx context.Context, parameter interface{}) (interface{}, error) {
+							us, err := cur.EvalString(ctx, parameter)
+							if err != nil {
+								return nil, err
+							}
+
+							them, err := next.EvalString(ctx, parameter)
+							if err != nil {
+								return nil, err
+							}
+
+							return us + them, nil
+						}, nil
+					}
+
+					return NewLanguage(
+						Init(func(ctx context.Context, p *Parser) (Evaluable, error) {
+							p.SetWhitespace()
+							p.SetMode(0)
+
+							return p.ParseExpression(ctx)
+						}),
+						Alternate(func(ctx context.Context, p *Parser) (Evaluable, error) {
+							return step(ctx, p, p.Const(p.TokenText()))
+						}),
+						PrefixExtension(scanner.EOF, func(ctx context.Context, p *Parser) (Evaluable, error) {
+							return p.Const(""), nil
+						}),
+						PrefixLanguage('{', Full(), func(ctx context.Context, p *Parser, eval Evaluable) (Evaluable, error) {
+							switch p.Scan() {
+							case '}':
+							default:
+								return nil, p.Expected("embedded", '}')
+							}
+
+							return step(ctx, p, eval)
+						}),
+					)
+				}(),
+				want: "left 10 right",
+			},
+			{
+				name:       "Late binding",
+				expression: "5 * [ 10 * { 20 / [ 10 ] } ]",
+				extension: Late(func(all Language) Language {
+					end := func(ch rune) func(ctx context.Context, p *Parser, eval Evaluable) (Evaluable, error) {
+						return func(ctx context.Context, p *Parser, eval Evaluable) (Evaluable, error) {
+							switch p.Scan() {
+							case ch:
+							default:
+								return nil, p.Expected("inner", ch)
+							}
+
+							return eval, nil
+						}
+					}
+
+					inner := Full(PrefixLanguage('{', all, end('}')))
+					return Full(PrefixLanguage('[', inner, end(']')))
+				}),
+				want: 100.0,
 			},
 		},
 		t,
