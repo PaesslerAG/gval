@@ -50,6 +50,9 @@ func parseString(c context.Context, p *Parser) (Evaluable, error) {
 func parseNumber(c context.Context, p *Parser) (Evaluable, error) {
 	n, err := strconv.ParseFloat(p.TokenText(), 64)
 	if err != nil {
+		if n, err := strconv.ParseInt(p.TokenText(), 0, 64); err == nil {
+			return p.Const(n), nil
+		}
 		return nil, err
 	}
 	return p.Const(n), nil
