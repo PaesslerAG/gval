@@ -26,7 +26,7 @@ func (e Evaluable) EvalInt(c context.Context, parameter interface{}) (int, error
 	return int(f), nil
 }
 
-//EvalFloat64 evaluates given parameter to an int
+//EvalFloat64 evaluates given parameter to a float64
 func (e Evaluable) EvalFloat64(c context.Context, parameter interface{}) (float64, error) {
 	v, err := e(c, parameter)
 	if err != nil {
