@@ -126,6 +126,7 @@ func variable(path Evaluables) Evaluable {
 				if err != nil {
 					return nil, fmt.Errorf("failed to select '%s' on %T: %w", k, o, err)
 				}
+				continue
 			case map[interface{}]interface{}:
 				v = o[k]
 				continue
