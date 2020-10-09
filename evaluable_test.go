@@ -115,14 +115,14 @@ func TestEvaluable_EvalFloat64(t *testing.T) {
 	}
 }
 
-type custSel struct {
-	Str string
+type testSelector struct {
+	str string
 	Map map[string]interface{}
 }
 
-func (s custSel) SelectGVal(ctx context.Context, k string) (interface{}, error) {
+func (s testSelector) SelectGVal(ctx context.Context, k string) (interface{}, error) {
 	if k == "str" {
-		return s.Str, nil
+		return s.str, nil
 	}
 
 	if k == "map" {
@@ -150,50 +150,50 @@ func TestEvaluable_CustomSelector(t *testing.T) {
 			{
 				"unknown",
 				"s.Foo",
-				map[string]interface{}{"s": &custSel{}},
+				map[string]interface{}{"s": &testSelector{}},
 				nil,
 				true,
 			},
 			{
 				"field directly",
 				"s.Str",
-				map[string]interface{}{"s": &custSel{Str: "test-value"}},
+				map[string]interface{}{"s": &testSelector{str: "test-value"}},
 				nil,
 				true,
 			},
 			{
 				"field via selector",
 				"s.str",
-				map[string]interface{}{"s": &custSel{Str: "test-value"}},
+				map[string]interface{}{"s": &testSelector{str: "test-value"}},
 				"test-value",
 				false,
 			},
 			{
 				"flat",
 				"str",
-				&custSel{Str: "test-value"},
+				&testSelector{str: "test-value"},
 				"test-value",
 				false,
 			},
 			{
 				"map field",
 				"s.map.foo",
-				map[string]interface{}{"s": &custSel{Map: map[string]interface{}{"foo": "bar"}}},
+				map[string]interface{}{"s": &testSelector{Map: map[string]interface{}{"foo": "bar"}}},
 				"bar",
 				false,
 			},
 			{
 				"crawl to val",
 				"deep.deeper.deepest.str",
-				&custSel{Str: "foo"},
+				&testSelector{str: "foo"},
 				"foo",
 				false,
 			},
 			{
 				"crawl to struct",
 				"deep.deeper.deepest",
-				&custSel{},
-				custSel{},
+				&testSelector{},
+				testSelector{},
 				false,
 			},
 		}
