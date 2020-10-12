@@ -115,10 +115,18 @@ func variable(path Evaluables) Evaluable {
 		for i, k := range keys {
 			switch o := v.(type) {
 			case map[interface{}]interface{}:
-				v = o[k]
+				var ok bool
+				v, ok = o[k]
+				if !ok {
+					return nil, fmt.Errorf("unknown parameter %s", k)
+				}
 				continue
 			case map[string]interface{}:
-				v = o[k]
+				var ok bool
+				v, ok = o[k]
+				if !ok {
+					return nil, fmt.Errorf("unknown parameter %s", k)
+				}
 				continue
 			case []interface{}:
 				if i, err := strconv.Atoi(k); err == nil && i >= 0 && len(o) > i {

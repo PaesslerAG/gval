@@ -95,6 +95,8 @@ func Base() Language {
 
 var full = NewLanguage(arithmetic, bitmask, text, propositionalLogic, ljson,
 
+	Constant("nil", nil),
+
 	InfixOperator("in", inArray),
 
 	InfixShortCircuit("??", func(a interface{}) (interface{}, bool) {
