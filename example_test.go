@@ -393,3 +393,32 @@ func ExampleLanguage() {
 	// Output:
 	// 150
 }
+
+type exampleCustomSelector struct{ hidden string }
+
+var _ gval.Selector = &exampleCustomSelector{}
+
+func (s *exampleCustomSelector) SelectGVal(ctx context.Context, k string) (interface{}, error) {
+	if k == "hidden" {
+		return s.hidden, nil
+	}
+
+	return nil, nil
+}
+
+func ExampleCustomSelector() {
+	lang := gval.Base()
+	value, err := lang.Evaluate(
+		"myStruct.hidden",
+		map[string]interface{}{"myStruct": &exampleCustomSelector{hidden: "hello world"}},
+	)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(value)
+
+	// Output:
+	// hello world
+}

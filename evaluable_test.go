@@ -2,6 +2,9 @@ package gval
 
 import (
 	"context"
+	"fmt"
+	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -107,6 +110,104 @@ func TestEvaluable_EvalFloat64(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("Evaluable.EvalFloat64() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+type testSelector struct {
+	str string
+	Map map[string]interface{}
+}
+
+func (s testSelector) SelectGVal(ctx context.Context, k string) (interface{}, error) {
+	if k == "str" {
+		return s.str, nil
+	}
+
+	if k == "map" {
+		return s.Map, nil
+	}
+
+	if strings.HasPrefix(k, "deep") {
+		return s, nil
+	}
+
+	return nil, fmt.Errorf("unknown-key")
+
+}
+
+func TestEvaluable_CustomSelector(t *testing.T) {
+	var (
+		lang  = Base()
+		tests = []struct {
+			name    string
+			expr    string
+			params  interface{}
+			want    interface{}
+			wantErr bool
+		}{
+			{
+				"unknown",
+				"s.Foo",
+				map[string]interface{}{"s": &testSelector{}},
+				nil,
+				true,
+			},
+			{
+				"field directly",
+				"s.Str",
+				map[string]interface{}{"s": &testSelector{str: "test-value"}},
+				nil,
+				true,
+			},
+			{
+				"field via selector",
+				"s.str",
+				map[string]interface{}{"s": &testSelector{str: "test-value"}},
+				"test-value",
+				false,
+			},
+			{
+				"flat",
+				"str",
+				&testSelector{str: "test-value"},
+				"test-value",
+				false,
+			},
+			{
+				"map field",
+				"s.map.foo",
+				map[string]interface{}{"s": &testSelector{Map: map[string]interface{}{"foo": "bar"}}},
+				"bar",
+				false,
+			},
+			{
+				"crawl to val",
+				"deep.deeper.deepest.str",
+				&testSelector{str: "foo"},
+				"foo",
+				false,
+			},
+			{
+				"crawl to struct",
+				"deep.deeper.deepest",
+				&testSelector{},
+				testSelector{},
+				false,
+			},
+		}
+	)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := lang.Evaluate(tt.expr, tt.params)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Evaluable.Evaluate() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Evaluable.Evaluate() = %v, want %v", got, tt.want)
 			}
 		})
 	}
