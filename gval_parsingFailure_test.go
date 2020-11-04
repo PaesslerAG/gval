@@ -153,7 +153,7 @@ func TestParsingFailure(t *testing.T) {
 			{
 				name:       "Hex float (Unsupported)",
 				expression: "0x1.1",
-				wantErr:    `strconv.ParseFloat: parsing "0x1": invalid syntax`,
+				wantErr:    `strconv.ParseFloat: parsing "0x1.1": invalid syntax`,
 			},
 			{
 				name:       "Hex invalid letter",
