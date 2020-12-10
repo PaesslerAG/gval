@@ -693,7 +693,7 @@ func TestNoParameter(t *testing.T) {
 			{
 				name:       "Handle all other prefixes",
 				expression: "^foo + $bar + &baz",
-				extension: Alternate(func(ctx context.Context, p *Parser) (Evaluable, error) {
+				extension: DefaultExtension(func(ctx context.Context, p *Parser) (Evaluable, error) {
 					var mul int
 					switch p.TokenText() {
 					case "^":
@@ -745,13 +745,18 @@ func TestNoParameter(t *testing.T) {
 
 							return p.ParseExpression(ctx)
 						}),
-						Alternate(func(ctx context.Context, p *Parser) (Evaluable, error) {
+						DefaultExtension(func(ctx context.Context, p *Parser) (Evaluable, error) {
 							return step(ctx, p, p.Const(p.TokenText()))
 						}),
 						PrefixExtension(scanner.EOF, func(ctx context.Context, p *Parser) (Evaluable, error) {
 							return p.Const(""), nil
 						}),
-						PrefixLanguage('{', Full(), func(ctx context.Context, p *Parser, eval Evaluable) (Evaluable, error) {
+						PrefixExtension('{', func(ctx context.Context, p *Parser) (Evaluable, error) {
+							eval, err := p.ParseSublanguage(ctx, Full())
+							if err != nil {
+								return nil, err
+							}
+
 							switch p.Scan() {
 							case '}':
 							default:
@@ -767,22 +772,39 @@ func TestNoParameter(t *testing.T) {
 			{
 				name:       "Late binding",
 				expression: "5 * [ 10 * { 20 / [ 10 ] } ]",
-				extension: Late(func(all Language) Language {
-					end := func(ch rune) func(ctx context.Context, p *Parser, eval Evaluable) (Evaluable, error) {
-						return func(ctx context.Context, p *Parser, eval Evaluable) (Evaluable, error) {
-							switch p.Scan() {
-							case ch:
-							default:
-								return nil, p.Expected("inner", ch)
-							}
+				extension: func() Language {
+					var inner, outer Language
 
-							return eval, nil
+					parseCurly := func(ctx context.Context, p *Parser) (Evaluable, error) {
+						eval, err := p.ParseSublanguage(ctx, outer)
+						if err != nil {
+							return nil, err
 						}
+
+						if p.Scan() != '}' {
+							return nil, p.Expected("end", '}')
+						}
+
+						return eval, nil
 					}
 
-					inner := Full(PrefixLanguage('{', all, end('}')))
-					return Full(PrefixLanguage('[', inner, end(']')))
-				}),
+					parseSquare := func(ctx context.Context, p *Parser) (Evaluable, error) {
+						eval, err := p.ParseSublanguage(ctx, inner)
+						if err != nil {
+							return nil, err
+						}
+
+						if p.Scan() != ']' {
+							return nil, p.Expected("end", ']')
+						}
+
+						return eval, nil
+					}
+
+					inner = Full(PrefixExtension('{', parseCurly))
+					outer = Full(PrefixExtension('[', parseSquare))
+					return outer
+				}(),
 				want: 100.0,
 			},
 		},

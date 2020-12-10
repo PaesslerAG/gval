@@ -36,12 +36,28 @@ func (p *Parser) ParseNextExpression(c context.Context) (eval Evaluable, err err
 	scan := p.Scan()
 	ex, ok := l.prefixes[scan]
 	if !ok {
-		if scan != scanner.EOF && l.alternate != nil {
-			return l.alternate(c, p)
+		if scan != scanner.EOF && l.def != nil {
+			return l.def(c, p)
 		}
 		return nil, p.Expected("extensions")
 	}
 	return ex(c, p)
+}
+
+// ParseSublanguage sets the next language for this parser to parse and calls
+// its initialization function, usually ParseExpression.
+func (p *Parser) ParseSublanguage(c context.Context, l Language) (Evaluable, error) {
+	p.pushLanguage(l)
+	defer p.popLanguage()
+
+	init := l.init
+	if init == nil {
+		init = func(c context.Context, p *Parser) (Evaluable, error) {
+			return p.ParseExpression(c)
+		}
+	}
+
+	return init(c, p)
 }
 
 func parseString(c context.Context, p *Parser) (Evaluable, error) {

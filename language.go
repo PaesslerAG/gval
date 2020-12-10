@@ -13,7 +13,7 @@ type Language struct {
 	operators       map[string]operator
 	operatorSymbols map[rune]struct{}
 	init            func(context.Context, *Parser) (Evaluable, error)
-	alternate       func(context.Context, *Parser) (Evaluable, error)
+	def             func(context.Context, *Parser) (Evaluable, error)
 	selector        func(Evaluables) Evaluable
 }
 
@@ -34,8 +34,8 @@ func NewLanguage(bases ...Language) Language {
 		if base.init != nil {
 			l.init = base.init
 		}
-		if base.alternate != nil {
-			l.alternate = base.alternate
+		if base.def != nil {
+			l.def = base.def
 		}
 		if base.selector != nil {
 			l.selector = base.selector
@@ -52,25 +52,11 @@ func newLanguage() Language {
 	}
 }
 
-func (l Language) ChainEvaluable(c context.Context, p *Parser) (Evaluable, error) {
-	p.pushLanguage(l)
-	defer p.popLanguage()
-
-	init := l.init
-	if init == nil {
-		init = func(c context.Context, p *Parser) (Evaluable, error) {
-			return p.ParseExpression(c)
-		}
-	}
-
-	return init(c, p)
-}
-
 // NewEvaluable returns an Evaluable for given expression in the specified language
 func (l Language) NewEvaluable(expression string) (Evaluable, error) {
 	p := newParser(expression)
 
-	eval, err := l.ChainEvaluable(context.Background(), p)
+	eval, err := p.ParseSublanguage(context.Background(), l)
 	if err == nil && p.isCamouflaged() && p.lastScan != scanner.EOF {
 		err = p.camouflage
 	}
@@ -137,23 +123,6 @@ func PrefixExtension(r rune, ext func(context.Context, *Parser) (Evaluable, erro
 	return l
 }
 
-// PrefixLanguage switches the parsing language from the current language to the
-// given language. When the subordinate language cannot consume any more input
-// from the parser, control is returned to the current language and the callback
-// is invoked to decide how to continue.
-func PrefixLanguage(r rune, sub Language, ext func(context.Context, *Parser, Evaluable) (Evaluable, error)) Language {
-	l := newLanguage()
-	l.prefixes[r] = func(c context.Context, p *Parser) (Evaluable, error) {
-		eval, err := sub.ChainEvaluable(c, p)
-		if err != nil {
-			return nil, err
-		}
-
-		return ext(c, p, eval)
-	}
-	return l
-}
-
 // Init is a language that does no parsing, but invokes the given function when
 // parsing starts. It is incumbent upon the function to call ParseExpression to
 // continue parsing.
@@ -166,23 +135,12 @@ func Init(ext func(context.Context, *Parser) (Evaluable, error)) Language {
 	return l
 }
 
-// Alternate is a language that runs the given function if no other prefix
-// matches.
-func Alternate(ext func(context.Context, *Parser) (Evaluable, error)) Language {
+// DefaultExtension is a language that runs the given function if no other
+// prefix matches.
+func DefaultExtension(ext func(context.Context, *Parser) (Evaluable, error)) Language {
 	l := newLanguage()
-	l.alternate = ext
+	l.def = ext
 	return l
-}
-
-// Late allows late-binding of a language so that languages can be
-// self-referencing. The return value of the passed function will be bound to
-// the language.
-func Late(fn func(late Language) Language) (binding Language) {
-	late := Init(func(ctx context.Context, p *Parser) (Evaluable, error) {
-		return binding.ChainEvaluable(ctx, p)
-	})
-	binding = fn(late)
-	return
 }
 
 // PrefixMetaPrefix chooses a Prefix to be executed
