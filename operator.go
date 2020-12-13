@@ -293,7 +293,7 @@ func (op directInfix) merge(op2 operator) operator {
 	return op
 }
 
-type prefix func(context.Context, *Parser) (Evaluable, error)
+type extension func(context.Context, *Parser) (Evaluable, error)
 
 type postfix struct {
 	operatorPrecedence

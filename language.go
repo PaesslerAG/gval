@@ -9,11 +9,11 @@ import (
 
 // Language is an expression language
 type Language struct {
-	prefixes        map[interface{}]prefix
+	prefixes        map[interface{}]extension
 	operators       map[string]operator
 	operatorSymbols map[rune]struct{}
-	init            func(context.Context, *Parser) (Evaluable, error)
-	def             func(context.Context, *Parser) (Evaluable, error)
+	init            extension
+	def             extension
 	selector        func(Evaluables) Evaluable
 }
 
@@ -46,7 +46,7 @@ func NewLanguage(bases ...Language) Language {
 
 func newLanguage() Language {
 	return Language{
-		prefixes:        map[interface{}]prefix{},
+		prefixes:        map[interface{}]extension{},
 		operators:       map[string]operator{},
 		operatorSymbols: map[rune]struct{}{},
 	}
@@ -54,9 +54,9 @@ func newLanguage() Language {
 
 // NewEvaluable returns an Evaluable for given expression in the specified language
 func (l Language) NewEvaluable(expression string) (Evaluable, error) {
-	p := newParser(expression)
+	p := newParser(expression, l)
 
-	eval, err := p.ParseSublanguage(context.Background(), l)
+	eval, err := p.parse(context.Background())
 	if err == nil && p.isCamouflaged() && p.lastScan != scanner.EOF {
 		err = p.camouflage
 	}
@@ -151,7 +151,7 @@ func PrefixMetaPrefix(r rune, ext func(context.Context, *Parser) (call string, a
 		if err != nil {
 			return nil, err
 		}
-		if prefix, ok := p.currentLanguage().prefixes[l.makePrefixKey(call)]; ok {
+		if prefix, ok := p.prefixes[l.makePrefixKey(call)]; ok {
 			return prefix(c, p)
 		}
 		return alternative()

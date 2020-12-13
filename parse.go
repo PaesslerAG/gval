@@ -31,13 +31,11 @@ func (p *Parser) ParseExpression(c context.Context) (eval Evaluable, err error) 
 
 //ParseNextExpression scans the expression ignoring following operators
 func (p *Parser) ParseNextExpression(c context.Context) (eval Evaluable, err error) {
-	l := p.currentLanguage()
-
 	scan := p.Scan()
-	ex, ok := l.prefixes[scan]
+	ex, ok := p.prefixes[scan]
 	if !ok {
-		if scan != scanner.EOF && l.def != nil {
-			return l.def(c, p)
+		if scan != scanner.EOF && p.def != nil {
+			return p.def(c, p)
 		}
 		return nil, p.Expected("extensions")
 	}
@@ -47,17 +45,33 @@ func (p *Parser) ParseNextExpression(c context.Context) (eval Evaluable, err err
 // ParseSublanguage sets the next language for this parser to parse and calls
 // its initialization function, usually ParseExpression.
 func (p *Parser) ParseSublanguage(c context.Context, l Language) (Evaluable, error) {
-	p.pushLanguage(l)
-	defer p.popLanguage()
+	if p.isCamouflaged() {
+		panic("can not ParseSublanguage() on camouflaged Parser")
+	}
+	curLang := p.Language
+	curWhitespace := p.scanner.Whitespace
+	curMode := p.scanner.Mode
+	curIsIdentRune := p.scanner.IsIdentRune
 
-	init := l.init
-	if init == nil {
-		init = func(c context.Context, p *Parser) (Evaluable, error) {
-			return p.ParseExpression(c)
-		}
+	p.Language = l
+	p.resetScannerProperties()
+
+	defer func() {
+		p.Language = curLang
+		p.scanner.Whitespace = curWhitespace
+		p.scanner.Mode = curMode
+		p.scanner.IsIdentRune = curIsIdentRune
+	}()
+
+	return p.parse(c)
+}
+
+func (p *Parser) parse(c context.Context) (Evaluable, error) {
+	if p.init != nil {
+		return p.init(c, p)
 	}
 
-	return init(c, p)
+	return p.ParseExpression(c)
 }
 
 func parseString(c context.Context, p *Parser) (Evaluable, error) {
@@ -90,15 +104,13 @@ func parseParentheses(c context.Context, p *Parser) (Evaluable, error) {
 }
 
 func (p *Parser) parseOperator(c context.Context, stack *stageStack, eval Evaluable) (st stage, err error) {
-	l := p.currentLanguage()
-
 	for {
 		scan := p.Scan()
 		op := p.TokenText()
 		mustOp := false
-		if l.isSymbolOperation(scan) {
+		if p.isSymbolOperation(scan) {
 			scan = p.Peek()
-			for l.isSymbolOperation(scan) {
+			for p.isSymbolOperation(scan) {
 				mustOp = true
 				op += string(scan)
 				p.Next()
@@ -108,7 +120,7 @@ func (p *Parser) parseOperator(c context.Context, stack *stageStack, eval Evalua
 			p.Camouflage("operator")
 			return stage{Evaluable: eval}, nil
 		}
-		operator, _ := l.operators[op]
+		operator, _ := p.operators[op]
 		switch operator := operator.(type) {
 		case *infix:
 			return stage{

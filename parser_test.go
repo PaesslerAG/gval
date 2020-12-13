@@ -132,8 +132,7 @@ func TestParser_Scan(t *testing.T) {
 				}
 			}()
 
-			p := newParser(tt.input)
-			p.pushLanguage(tt.Language)
+			p := newParser(tt.input, tt.Language)
 			tt.do(p)
 			if tt.wantPanic {
 				return
