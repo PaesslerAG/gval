@@ -91,10 +91,10 @@ func constant(value interface{}) Evaluable {
 //	slices and
 //  map with int or string key.
 func (p *Parser) Var(path ...Evaluable) Evaluable {
-	if p.Language.selector == nil {
+	if p.selector == nil {
 		return variable(path)
 	}
-	return p.Language.selector(path)
+	return p.selector(path)
 }
 
 // Evaluables is a slice of Evaluable.

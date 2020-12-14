@@ -406,12 +406,38 @@ func (s *exampleCustomSelector) SelectGVal(ctx context.Context, k string) (inter
 	return nil, nil
 }
 
-func ExampleCustomSelector() {
+func ExampleSelector() {
 	lang := gval.Base()
 	value, err := lang.Evaluate(
 		"myStruct.hidden",
 		map[string]interface{}{"myStruct": &exampleCustomSelector{hidden: "hello world"}},
 	)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(value)
+
+	// Output:
+	// hello world
+}
+
+func parseSub(ctx context.Context, p *gval.Parser) (gval.Evaluable, error) {
+	return p.ParseSublanguage(ctx, subLang)
+}
+
+var (
+	superLang = gval.NewLanguage(
+		gval.PrefixExtension('$', parseSub),
+	)
+	subLang = gval.NewLanguage(
+		gval.Init(func(ctx context.Context, p *gval.Parser) (gval.Evaluable, error) { return p.Const("hello world"), nil }),
+	)
+)
+
+func ExampleParser_ParseSublanguage() {
+	value, err := superLang.Evaluate("$", nil)
 
 	if err != nil {
 		fmt.Println(err)

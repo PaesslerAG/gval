@@ -3,6 +3,7 @@ package gval
 import (
 	"testing"
 	"text/scanner"
+	"unicode"
 )
 
 func TestParser_Scan(t *testing.T) {
@@ -13,7 +14,7 @@ func TestParser_Scan(t *testing.T) {
 		do        func(p *Parser)
 		wantScan  rune
 		wantToken string
-		wanPanic  bool
+		wantPanic bool
 	}{
 		{
 			name:  "camouflage",
@@ -33,7 +34,7 @@ func TestParser_Scan(t *testing.T) {
 				p.Camouflage("test")
 				p.Next()
 			},
-			wanPanic: true,
+			wantPanic: true,
 		},
 		{
 			name:  "camouflage scan camouflage",
@@ -55,7 +56,7 @@ func TestParser_Scan(t *testing.T) {
 				p.Camouflage("test")
 				p.Peek()
 			},
-			wanPanic: true,
+			wantPanic: true,
 		},
 		{
 			name:  "next and peek",
@@ -91,19 +92,49 @@ func TestParser_Scan(t *testing.T) {
 			wantScan:  scanner.Ident,
 			wantToken: "abc",
 		},
+		{
+			name:  "tokenize all whitespace",
+			input: "foo\tbar\nbaz",
+			do: func(p *Parser) {
+				p.SetWhitespace()
+				p.Scan()
+			},
+			wantScan:  '\t',
+			wantToken: "\t",
+		},
+		{
+			name:  "custom ident",
+			input: "$#foo",
+			do: func(p *Parser) {
+				p.SetIsIdentRuneFunc(func(ch rune, i int) bool { return unicode.IsLetter(ch) || ch == '#' })
+				p.Scan()
+			},
+			wantScan:  scanner.Ident,
+			wantToken: "#foo",
+		},
+		{
+			name:  "do not scan idents",
+			input: "abc",
+			do: func(p *Parser) {
+				p.SetMode(scanner.GoTokens ^ scanner.ScanIdents)
+				p.Scan()
+			},
+			wantScan:  'b',
+			wantToken: "b",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defer func() {
 				err := recover()
-				if err != nil && !tt.wanPanic {
+				if err != nil && !tt.wantPanic {
 					t.Fatalf("unexpected panic: %v", err)
 				}
 			}()
 
 			p := newParser(tt.input, tt.Language)
 			tt.do(p)
-			if tt.wanPanic {
+			if tt.wantPanic {
 				return
 			}
 			scan := p.Scan()

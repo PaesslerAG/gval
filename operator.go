@@ -255,19 +255,19 @@ type infix struct {
 func (op infix) merge(op2 operator) operator {
 	switch op2 := op2.(type) {
 	case *infix:
-		if op2.number != nil {
+		if op.number == nil {
 			op.number = op2.number
 		}
-		if op2.boolean != nil {
+		if op.boolean == nil {
 			op.boolean = op2.boolean
 		}
-		if op2.text != nil {
+		if op.text == nil {
 			op.text = op2.text
 		}
-		if op2.arbitrary != nil {
+		if op.arbitrary == nil {
 			op.arbitrary = op2.arbitrary
 		}
-		if op2.shortCircuit != nil {
+		if op.shortCircuit == nil {
 			op.shortCircuit = op2.shortCircuit
 		}
 	}
@@ -293,7 +293,7 @@ func (op directInfix) merge(op2 operator) operator {
 	return op
 }
 
-type prefix func(context.Context, *Parser) (Evaluable, error)
+type extension func(context.Context, *Parser) (Evaluable, error)
 
 type postfix struct {
 	operatorPrecedence

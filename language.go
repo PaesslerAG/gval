@@ -9,9 +9,11 @@ import (
 
 // Language is an expression language
 type Language struct {
-	prefixes        map[interface{}]prefix
+	prefixes        map[interface{}]extension
 	operators       map[string]operator
 	operatorSymbols map[rune]struct{}
+	init            extension
+	def             extension
 	selector        func(Evaluables) Evaluable
 }
 
@@ -29,6 +31,12 @@ func NewLanguage(bases ...Language) Language {
 		for i := range base.operatorSymbols {
 			l.operatorSymbols[i] = struct{}{}
 		}
+		if base.init != nil {
+			l.init = base.init
+		}
+		if base.def != nil {
+			l.def = base.def
+		}
 		if base.selector != nil {
 			l.selector = base.selector
 		}
@@ -38,7 +46,7 @@ func NewLanguage(bases ...Language) Language {
 
 func newLanguage() Language {
 	return Language{
-		prefixes:        map[interface{}]prefix{},
+		prefixes:        map[interface{}]extension{},
 		operators:       map[string]operator{},
 		operatorSymbols: map[rune]struct{}{},
 	}
@@ -48,16 +56,15 @@ func newLanguage() Language {
 func (l Language) NewEvaluable(expression string) (Evaluable, error) {
 	p := newParser(expression, l)
 
-	eval, err := p.ParseExpression(context.Background())
-
+	eval, err := p.parse(context.Background())
 	if err == nil && p.isCamouflaged() && p.lastScan != scanner.EOF {
 		err = p.camouflage
 	}
-
 	if err != nil {
 		pos := p.scanner.Pos()
 		return nil, fmt.Errorf("parsing error: %s - %d:%d %s", p.scanner.Position, pos.Line, pos.Column, err)
 	}
+
 	return eval, nil
 }
 
@@ -113,6 +120,26 @@ func Constant(name string, value interface{}) Language {
 func PrefixExtension(r rune, ext func(context.Context, *Parser) (Evaluable, error)) Language {
 	l := newLanguage()
 	l.prefixes[r] = ext
+	return l
+}
+
+// Init is a language that does no parsing, but invokes the given function when
+// parsing starts. It is incumbent upon the function to call ParseExpression to
+// continue parsing.
+//
+// This function can be used to customize the parser settings, such as
+// whitespace or ident behavior.
+func Init(ext func(context.Context, *Parser) (Evaluable, error)) Language {
+	l := newLanguage()
+	l.init = ext
+	return l
+}
+
+// DefaultExtension is a language that runs the given function if no other
+// prefix matches.
+func DefaultExtension(ext func(context.Context, *Parser) (Evaluable, error)) Language {
+	l := newLanguage()
+	l.def = ext
 	return l
 }
 
