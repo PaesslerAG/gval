@@ -1,6 +1,6 @@
 # Gval
 
-[![Godoc](https://pkg.go.dev/github.com/PaesslerAG/gval?status.png)](https://pkg.go.dev/github.com/PaesslerAG/gval)
+[![Go Reference](https://pkg.go.dev/badge/github.com/PaesslerAG/gval.svg)](https://pkg.go.dev/github.com/PaesslerAG/gval)
 [![Build Status](https://api.travis-ci.org/PaesslerAG/gval.svg?branch=master)](https://travis-ci.org/PaesslerAG/gval)
 [![Coverage Status](https://coveralls.io/repos/github/PaesslerAG/gval/badge.svg?branch=master)](https://coveralls.io/github/PaesslerAG/gval?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/PaesslerAG/gval)](https://goreportcard.com/report/github.com/PaesslerAG/gval)
