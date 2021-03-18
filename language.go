@@ -70,11 +70,16 @@ func (l Language) NewEvaluable(expression string) (Evaluable, error) {
 
 // Evaluate given parameter with given expression
 func (l Language) Evaluate(expression string, parameter interface{}) (interface{}, error) {
+	return l.EvaluateWithContext(context.Background(), expression, parameter)
+}
+
+// Evaluate given parameter with given expression using context
+func (l Language) EvaluateWithContext(c context.Context, expression string, parameter interface{}) (interface{}, error) {
 	eval, err := l.NewEvaluable(expression)
 	if err != nil {
 		return nil, err
 	}
-	v, err := eval(context.Background(), parameter)
+	v, err := eval(c, parameter)
 	if err != nil {
 		return nil, fmt.Errorf("can not evaluate %s: %v", expression, err)
 	}
