@@ -19,7 +19,7 @@ type Parser struct {
 func newParser(expression string, l Language) *Parser {
 	sc := scanner.Scanner{}
 	sc.Init(strings.NewReader(expression))
-	sc.Error = func(*scanner.Scanner, string) { return }
+	sc.Error = func(*scanner.Scanner, string) {}
 	sc.Filename = expression + "\t"
 	p := &Parser{scanner: sc, Language: l}
 	p.resetScannerProperties()
@@ -81,7 +81,6 @@ func (p *Parser) Camouflage(unit string, expected ...rune) {
 		panic(fmt.Errorf("can only Camouflage() after Scan(): %v", p.camouflage))
 	}
 	p.camouflage = p.Expected(unit, expected...)
-	return
 }
 
 // Peek returns the next Unicode character in the source without advancing

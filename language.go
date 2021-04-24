@@ -254,8 +254,7 @@ func (l *Language) makePrefixKey(key string) interface{} {
 }
 
 func (l *Language) makeInfixKey(key string) string {
-	runes := []rune(key)
-	for _, r := range runes {
+	for _, r := range key {
 		l.operatorSymbols[r] = struct{}{}
 	}
 	return key

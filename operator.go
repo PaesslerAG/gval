@@ -104,7 +104,6 @@ func (op *infix) initiate(name string) {
 			return f(a, b)
 		}, nil
 	}
-	return
 }
 
 type opFunc func(a, b interface{}) (interface{}, error)

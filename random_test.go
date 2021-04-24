@@ -13,7 +13,6 @@ var (
 	hello  = "hello"
 	empty  struct{}
 	empty2 *string
-	empty3 *int
 
 	values = []interface{}{
 		-1,
@@ -101,13 +100,9 @@ var (
 		"\n",
 		"\000",
 	}
-
-	panics = 0
 )
 
-const (
-	SEED = 1487873697990155515
-)
+const SEED = 1487873697990155515
 
 func BenchmarkRandom(bench *testing.B) {
 	rand.Seed(SEED)
