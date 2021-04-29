@@ -120,8 +120,7 @@ func (p *Parser) parseOperator(c context.Context, stack *stageStack, eval Evalua
 			p.Camouflage("operator")
 			return stage{Evaluable: eval}, nil
 		}
-		operator, _ := p.operators[op]
-		switch operator := operator.(type) {
+		switch operator := p.operators[op].(type) {
 		case *infix:
 			return stage{
 				Evaluable:          eval,

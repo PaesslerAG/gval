@@ -297,7 +297,7 @@ func regEx(a, b Evaluable) (Evaluable, error) {
 			return matched, err
 		}, nil
 	}
-	s, err := b.EvalString(nil, nil)
+	s, err := b.EvalString(context.TODO(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -329,7 +329,7 @@ func notRegEx(a, b Evaluable) (Evaluable, error) {
 			return !matched, err
 		}, nil
 	}
-	s, err := b.EvalString(nil, nil)
+	s, err := b.EvalString(context.TODO(), nil)
 	if err != nil {
 		return nil, err
 	}
