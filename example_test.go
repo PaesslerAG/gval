@@ -448,3 +448,27 @@ func ExampleParser_ParseSublanguage() {
 	// Output:
 	// hello world
 }
+
+func ExampleEvaluate_NullStructField() {
+	user := struct {
+		ProjectID *uint
+	}{}
+	user.ProjectID = nil // its nil
+
+	// alternatively: "ProjectID > 0" will return the same, because nil ptr will use zero value '0'
+	value, err := gval.Evaluate("(ProjectID ?? 0) > 0", user)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(value)
+
+	value, err = gval.Evaluate("(ProjectID ?? 99) > 0", user)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(value)
+
+	// Output:
+	// false
+	// true
+}

@@ -103,9 +103,17 @@ var full = NewLanguage(arithmetic, bitmask, text, propositionalLogic, ljson,
 	InfixOperator("in", inArray),
 
 	InfixShortCircuit("??", func(a interface{}) (interface{}, bool) {
+		if v := reflect.ValueOf(a); v.Kind() == reflect.Ptr && v.IsNil() {
+			return nil, false
+		}
+
 		return a, a != false && a != nil
 	}),
 	InfixOperator("??", func(a, b interface{}) (interface{}, error) {
+		if v := reflect.ValueOf(a); v.Kind() == reflect.Ptr && v.IsNil() {
+			return b, nil
+		}
+
 		if a == false || a == nil {
 			return b, nil
 		}
