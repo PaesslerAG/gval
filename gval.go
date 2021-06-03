@@ -103,10 +103,11 @@ var full = NewLanguage(arithmetic, bitmask, text, propositionalLogic, ljson,
 	InfixOperator("in", inArray),
 
 	InfixShortCircuit("??", func(a interface{}) (interface{}, bool) {
-		return a, a != false && a != nil
+		v := reflect.ValueOf(a)
+		return a, a != nil && !v.IsZero()
 	}),
 	InfixOperator("??", func(a, b interface{}) (interface{}, error) {
-		if a == false || a == nil {
+		if v := reflect.ValueOf(a); a == nil || v.IsZero() {
 			return b, nil
 		}
 		return a, nil
