@@ -255,7 +255,7 @@ func parseIf(c context.Context, p *Parser, e Evaluable) (Evaluable, error) {
 		if err != nil {
 			return nil, err
 		}
-		if x == false || x == nil {
+		if valX := reflect.ValueOf(x); x == nil || valX.IsZero() {
 			return b(c, v)
 		}
 		return a(c, v)
