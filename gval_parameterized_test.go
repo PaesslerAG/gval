@@ -592,6 +592,38 @@ func TestParameterized(t *testing.T) {
 				},
 				want: 1.,
 			},
+			{
+				name:       "coalesce typed nil 0",
+				expression: `ProjectID ?? 0`,
+				parameter: struct {
+					ProjectID *uint
+				}{},
+				want: 0.,
+			},
+			{
+				name:       "coalesce typed nil 99",
+				expression: `ProjectID ?? 99`,
+				parameter: struct {
+					ProjectID *uint
+				}{},
+				want: 99.,
+			},
+			{
+				name:       "operator with typed nil 99",
+				expression: `ProjectID + 99`,
+				parameter: struct {
+					ProjectID *uint
+				}{},
+				want: "<nil>99",
+			},
+			{
+				name:       "operator with typed nil if",
+				expression: `Flag ? 1 : 2`,
+				parameter: struct {
+					Flag *uint
+				}{},
+				want: 2.,
+			},
 		},
 		t,
 	)
