@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 type stage struct {
@@ -51,6 +52,15 @@ type infixBuilder func(a, b Evaluable) (Evaluable, error)
 func (l Language) isSymbolOperation(r rune) bool {
 	_, in := l.operatorSymbols[r]
 	return in
+}
+
+func (l Language) isOperatorPrefix(op string) bool {
+	for k := range l.operators {
+		if strings.HasPrefix(k, op) {
+			return true
+		}
+	}
+	return false
 }
 
 func (op *infix) initiate(name string) {

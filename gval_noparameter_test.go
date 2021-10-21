@@ -135,6 +135,11 @@ func TestNoParameter(t *testing.T) {
 				want:       true,
 			},
 			{
+				name:       "Equal test minus numbers and no spaces",
+				expression: "-1==-1",
+				want:       true,
+			},
+			{
 
 				name:       "Compound boolean",
 				expression: "5 < 10 && 1 < 5",

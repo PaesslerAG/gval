@@ -16,18 +16,18 @@ func TestParsingFailure(t *testing.T) {
 			{
 				name:       "Invalid equality comparator",
 				expression: "1 === 1",
-				wantErr:    unknownOp("==="),
+				wantErr:    unexpected(`"="`, "extension"),
 			},
 			{
 				name:       "Too many characters for logical operator",
 				expression: "true &&& false",
-				wantErr:    unknownOp("&&&"),
+				wantErr:    unexpected(`"&"`, "extension"),
 			},
 			{
 
 				name:       "Too many characters for logical operator",
 				expression: "true ||| false",
-				wantErr:    unknownOp("|||"),
+				wantErr:    unexpected(`"|"`, "extension"),
 			},
 			{
 
