@@ -75,6 +75,7 @@ func (*Parser) Const(value interface{}) Evaluable {
 	return constant(value)
 }
 
+//go:noinline
 func constant(value interface{}) Evaluable {
 	return func(c context.Context, v interface{}) (interface{}, error) {
 		return value, nil
