@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"text/scanner"
 	"unicode"
+
+	"github.com/shopspring/decimal"
 )
 
 // Language is an expression language
@@ -220,6 +222,11 @@ func InfixTextOperator(name string, f func(a, b string) (interface{}, error)) La
 // InfixNumberOperator for two number values.
 func InfixNumberOperator(name string, f func(a, b float64) (interface{}, error)) Language {
 	return newLanguageOperator(name, &infix{number: f})
+}
+
+// InfixDecimalOperator for two decimal values.
+func InfixDecimalOperator(name string, f func(a, b decimal.Decimal) (interface{}, error)) Language {
+	return newLanguageOperator(name, &infix{decimal: f})
 }
 
 // InfixBoolOperator for two bool values.

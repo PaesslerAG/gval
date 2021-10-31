@@ -5,15 +5,18 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/shopspring/decimal"
 )
 
 type evaluationTest struct {
-	name       string
-	expression string
-	extension  Language
-	parameter  interface{}
-	want       interface{}
-	wantErr    string
+	name         string
+	expression   string
+	extension    Language
+	parameter    interface{}
+	want         interface{}
+	equalityFunc func(x, y interface{}) bool
+	wantErr      string
 }
 
 func testEvaluate(tests []evaluationTest, t *testing.T) {
@@ -34,7 +37,11 @@ func testEvaluate(tests []evaluationTest, t *testing.T) {
 				t.Errorf("Evaluate() error = %v", err)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
+			if ef := tt.equalityFunc; ef != nil {
+				if !ef(got, tt.want) {
+					t.Errorf("Evaluate(%s) = %v, want %v", tt.expression, got, tt.want)
+				}
+			} else if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Evaluate(%s) = %v, want %v", tt.expression, got, tt.want)
 			}
 		})
@@ -99,4 +106,15 @@ var foo = dummyParameter{
 var fooFailureParameters = map[string]interface{}{
 	"foo":    foo,
 	"fooptr": &foo,
+}
+
+var decimalEqualityFunc = func(x, y interface{}) bool {
+	v1, ok1 := x.(decimal.Decimal)
+	v2, ok2 := y.(decimal.Decimal)
+
+	if !ok1 || !ok2 {
+		return false
+	}
+
+	return v1.Equal(v2)
 }

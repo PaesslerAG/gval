@@ -107,6 +107,24 @@ func BenchmarkGval(bench *testing.B) {
 			expression: `foo.Nested.Funk`,
 			parameter:  fooFailureParameters,
 		},
+		{
+			name:       "decimal arithmetic",
+			expression: "(requests_made * requests_succeeded / 100)",
+			extension:  decimalArithmetic,
+			parameter: map[string]interface{}{
+				"requests_made":      99.0,
+				"requests_succeeded": 90.0,
+			},
+		},
+		{
+			name:       "decimal logic",
+			expression: "(requests_made * requests_succeeded / 100) >= 90",
+			extension:  decimalArithmetic,
+			parameter: map[string]interface{}{
+				"requests_made":      99.0,
+				"requests_succeeded": 90.0,
+			},
+		},
 	}
 	for _, benchmark := range benchmarks {
 		eval, err := Full().NewEvaluable(benchmark.expression)
