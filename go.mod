@@ -1,4 +1,4 @@
-module github.com/PaesslerAG/gval
+module github.com/machship-mm/gval
 
 go 1.15
 
