@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/shopspring/decimal"
 )
 
 func TestParameterized(t *testing.T) {
@@ -623,6 +625,69 @@ func TestParameterized(t *testing.T) {
 					Flag *uint
 				}{},
 				want: 2.,
+			},
+			{
+				name:       "Decimal math doesn't experience rounding error",
+				expression: "(x * 12.146) - y",
+				extension:  decimalArithmetic,
+				parameter: map[string]interface{}{
+					"x": 12.5,
+					"y": -5,
+				},
+				want:         decimal.NewFromFloat(156.825),
+				equalityFunc: decimalEqualityFunc,
+			},
+			{
+				name:       "Decimal logical operators fractional difference",
+				expression: "((x * 12.146) - y) > 156.824999999",
+				extension:  decimalArithmetic,
+				parameter: map[string]interface{}{
+					"x": 12.5,
+					"y": -5,
+				},
+				want: true,
+			},
+			{
+				name:       "Decimal logical operators whole number difference",
+				expression: "((x * 12.146) - y) > 156",
+				extension:  decimalArithmetic,
+				parameter: map[string]interface{}{
+					"x": 12.5,
+					"y": -5,
+				},
+				want: true,
+			},
+			{
+				name:       "Decimal logical operators exact decimal match against GT",
+				expression: "((x * 12.146) - y) > 156.825",
+				extension:  decimalArithmetic,
+				parameter: map[string]interface{}{
+					"x": 12.5,
+					"y": -5,
+				},
+				want: false,
+			},
+			{
+				name:       "Decimal logical operators exact equality",
+				expression: "((x * 12.146) - y) == 156.825",
+				extension:  decimalArithmetic,
+				parameter: map[string]interface{}{
+					"x": 12.5,
+					"y": -5,
+				},
+				want: true,
+			},
+			{
+				name:       "Decimal mixes with string logic with force fail",
+				expression: `(((x * 12.146) - y) == 156.825) && a == "test" && !b && b`,
+				extension:  decimalArithmetic,
+				parameter: map[string]interface{}{
+					"x": 12.5,
+					"y": -5,
+					"a": "test",
+					"b": false,
+				},
+				want: false,
 			},
 		},
 		t,
