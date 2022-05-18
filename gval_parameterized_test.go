@@ -61,6 +61,14 @@ func TestParameterized(t *testing.T) {
 				want: 30.0,
 			},
 			{
+				name:       "NoSpaceOperator",
+				expression: "true&&name",
+				parameter: map[string]interface{}{
+					"name": true,
+				},
+				want: true,
+			},
+			{
 
 				name:       "Parameter name sensitivity",
 				expression: "foo + FoO + FOO",
