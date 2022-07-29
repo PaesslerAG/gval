@@ -130,6 +130,17 @@ func Test_toFunc(t *testing.T) {
 			},
 			wantErr: context.DeadlineExceeded,
 		},
+		{
+			name: "nil arg",
+			function: func(a interface{}) bool {
+				if a != nil {
+					return true
+				}
+				return false
+			},
+			arguments: []interface{}{nil},
+			want:      true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
