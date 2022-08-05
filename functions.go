@@ -14,6 +14,11 @@ func toFunc(f interface{}) function {
 			var v interface{}
 			errCh := make(chan error)
 			go func() {
+				defer func() {
+					if recovered := recover(); recovered != nil {
+						errCh <- fmt.Errorf("%v", recovered)
+					}
+				}()
 				result, err := f(arguments...)
 				v = result
 				errCh <- err
@@ -37,6 +42,11 @@ func toFunc(f interface{}) function {
 		var v interface{}
 		errCh := make(chan error)
 		go func() {
+			defer func() {
+				if recovered := recover(); recovered != nil {
+					errCh <- fmt.Errorf("%v", recovered)
+				}
+			}()
 			in, err := createCallArguments(ctx, t, args)
 			if err != nil {
 				errCh <- err
