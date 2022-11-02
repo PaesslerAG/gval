@@ -365,6 +365,18 @@ func TestModifierTyping(test *testing.T) {
 			expression: `nil > 1`,
 			wantErr:    "invalid operation (<nil>) > (float64)",
 		},
+		{
+			name:       "map with unknown func",
+			expression: `foo.MapWithFunc.NotExist()`,
+			parameter:  map[string]interface{}{"foo": foo},
+			wantErr:    unknownParameter,
+		},
+		{
+			name:       "map with unknown func",
+			expression: `foo.SliceWithFunc.NotExist()`,
+			parameter:  map[string]interface{}{"foo": foo},
+			wantErr:    unknownParameter,
+		},
 	}
 
 	for i := range evaluationTests {

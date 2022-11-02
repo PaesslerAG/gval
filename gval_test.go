@@ -48,13 +48,15 @@ func testEvaluate(tests []evaluationTest, t *testing.T) {
 	}
 }
 
-//dummyParameter used to test "parameter calls".
+// dummyParameter used to test "parameter calls".
 type dummyParameter struct {
-	String    string
-	Int       int
-	BoolFalse bool
-	Nil       interface{}
-	Nested    dummyNestedParameter
+	String        string
+	Int           int
+	BoolFalse     bool
+	Nil           interface{}
+	Nested        dummyNestedParameter
+	MapWithFunc   dummyMapWithFunc
+	SliceWithFunc dummySliceWithFunc
 }
 
 func (d dummyParameter) Func() string {
@@ -101,6 +103,8 @@ var foo = dummyParameter{
 		Map:   map[string]int{"a": 1, "b": 2, "c": 3},
 		Slice: []int{1, 2, 3},
 	},
+	MapWithFunc:   dummyMapWithFunc{"a": {1, 2}, "b": {3, 4}},
+	SliceWithFunc: dummySliceWithFunc{"a", "b", "c", "a"},
 }
 
 var fooFailureParameters = map[string]interface{}{
@@ -117,4 +121,33 @@ var decimalEqualityFunc = func(x, y interface{}) bool {
 	}
 
 	return v1.Equal(v2)
+}
+
+type dummyMapWithFunc map[string][]int
+
+func (m dummyMapWithFunc) Sum(key string) int {
+	values, ok := m[key]
+	if !ok {
+		return -1
+	}
+
+	sum := 0
+	for _, v := range values {
+		sum += v
+	}
+
+	return sum
+}
+
+type dummySliceWithFunc []string
+
+func (m dummySliceWithFunc) Sum(key string) int {
+	sum := 0
+	for _, v := range m {
+		if v == key {
+			sum += 1
+		}
+	}
+
+	return sum
 }
