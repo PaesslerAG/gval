@@ -12,6 +12,11 @@ import (
 )
 
 func TestParameterized(t *testing.T) {
+	// This is a number that's not exactly representable with a
+	// float64: 2^53 + 1. We also negate it here so that the
+	// negative operator can be more easily tested.
+	nonFloat64Dec, _ := decimal.NewFromString("-18014398509481985")
+
 	testEvaluate(
 		[]evaluationTest{
 			{
@@ -696,6 +701,24 @@ func TestParameterized(t *testing.T) {
 					"b": false,
 				},
 				want: false,
+			},
+			{
+				name:       "Decimal literal negation works",
+				expression: `-x == -1`,
+				extension:  decimalArithmetic,
+				parameter: map[string]interface{}{
+					"x": "1",
+				},
+				want: true,
+			},
+			{
+				name:       "Decimal negation doesn't go through float",
+				expression: `(-x) % 2 == 1`,
+				extension:  decimalArithmetic,
+				parameter: map[string]interface{}{
+					"x": nonFloat64Dec,
+				},
+				want: true,
 			},
 		},
 		t,
