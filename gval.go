@@ -205,11 +205,11 @@ var decimalArithmetic = NewLanguage(
 	PrefixExtension(scanner.Int, parseDecimal),
 	PrefixExtension(scanner.Float, parseDecimal),
 	PrefixOperator("-", func(c context.Context, v interface{}) (interface{}, error) {
-		i, ok := convertToFloat(v)
+		i, ok := convertToDecimal(v)
 		if !ok {
 			return nil, fmt.Errorf("unexpected %v(%T) expected number", v, v)
 		}
-		return decimal.NewFromFloat(i).Neg(), nil
+		return i.Neg(), nil
 	}),
 )
 
