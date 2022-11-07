@@ -252,15 +252,20 @@ func convertToDecimal(o interface{}) (decimal.Decimal, bool) {
 	switch v.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return decimal.NewFromInt(v.Int()), true
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32:
 		return decimal.NewFromFloat(float64(v.Uint())), true
+	case reflect.Uint64:
+		i, err := decimal.NewFromString(fmt.Sprint(v.Uint()))
+		if err == nil {
+			return i, true
+		}
 	case reflect.Float32, reflect.Float64:
 		return decimal.NewFromFloat(v.Float()), true
 	}
 	if s, ok := o.(string); ok {
-		f, err := strconv.ParseFloat(s, 64)
+		i, err := decimal.NewFromString(s)
 		if err == nil {
-			return decimal.NewFromFloat(f), true
+			return i, true
 		}
 	}
 	return decimal.Zero, false
