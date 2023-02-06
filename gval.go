@@ -16,12 +16,12 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-//Evaluate given parameter with given expression in gval full language
+// Evaluate given parameter with given expression in gval full language
 func Evaluate(expression string, parameter interface{}, opts ...Language) (interface{}, error) {
 	return EvaluateWithContext(context.Background(), expression, parameter, opts...)
 }
 
-//Evaluate given parameter with given expression in gval full language using a context
+// Evaluate given parameter with given expression in gval full language using a context
 func EvaluateWithContext(c context.Context, expression string, parameter interface{}, opts ...Language) (interface{}, error) {
 	l := full
 	if len(opts) > 0 {
@@ -31,9 +31,10 @@ func EvaluateWithContext(c context.Context, expression string, parameter interfa
 }
 
 // Full is the union of Arithmetic, Bitmask, Text, PropositionalLogic, and Json
-// 		Operator in: a in b is true iff value a is an element of array b
-// 		Operator ??: a ?? b returns a if a is not false or nil, otherwise n
-// 		Operator ?: a ? b : c returns b if bool a is true, otherwise b
+//
+//	Operator in: a in b is true iff value a is an element of array b
+//	Operator ??: a ?? b returns a if a is not false or nil, otherwise n
+//	Operator ?: a ? b : c returns b if bool a is true, otherwise b
 //
 // Function Date: Date(a) parses string a. a must match RFC3339, ISO8601, ruby date, or unix date
 func Full(extensions ...Language) Language {
@@ -106,7 +107,7 @@ func Ident() Language {
 }
 
 // Base contains equal (==) and not equal (!=), perentheses and general support for variables, constants and functions
-// It contains true, false, (floating point) number, string  ("" or ``) and char ('') constants
+// It contains true, false, (floating point) number, string  ("" or “) and char (”) constants
 func Base() Language {
 	return base
 }
