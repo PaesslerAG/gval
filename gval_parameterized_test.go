@@ -697,6 +697,22 @@ func TestParameterized(t *testing.T) {
 				},
 				want: false,
 			},
+			{
+				name:       "Typed map with function call",
+				expression: `foo.MapWithFunc.Sum("a")`,
+				parameter: map[string]interface{}{
+					"foo": foo,
+				},
+				want: 3,
+			},
+			{
+				name:       "Types slice with function call",
+				expression: `foo.SliceWithFunc.Sum("a")`,
+				parameter: map[string]interface{}{
+					"foo": foo,
+				},
+				want: 2,
+			},
 		},
 		t,
 	)
