@@ -48,7 +48,7 @@ func testEvaluate(tests []evaluationTest, t *testing.T) {
 	}
 }
 
-//dummyParameter used to test "parameter calls".
+// dummyParameter used to test "parameter calls".
 type dummyParameter struct {
 	String    string
 	Int       int
