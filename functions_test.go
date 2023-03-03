@@ -133,10 +133,7 @@ func Test_toFunc(t *testing.T) {
 		{
 			name: "nil arg",
 			function: func(a interface{}) bool {
-				if a != nil {
-					return true
-				}
-				return false
+				return a != nil
 			},
 			arguments: []interface{}{nil},
 			want:      true,

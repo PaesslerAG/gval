@@ -30,11 +30,10 @@ func EvaluateWithContext(c context.Context, expression string, parameter interfa
 	return l.EvaluateWithContext(c, expression, parameter)
 }
 
-// Full is the union of Arithmetic, Bitmask, Text, PropositionalLogic, and Json
+// Full is the union of Arithmetic, Bitmask, Text, PropositionalLogic, TernaryOperator, and Json
 //
 //	Operator in: a in b is true iff value a is an element of array b
 //	Operator ??: a ?? b returns a if a is not false or nil, otherwise n
-//	Operator ?: a ? b : c returns b if bool a is true, otherwise b
 //
 // Function Date: Date(a) parses string a. a must match RFC3339, ISO8601, ruby date, or unix date
 func Full(extensions ...Language) Language {
@@ -42,6 +41,13 @@ func Full(extensions ...Language) Language {
 		return full
 	}
 	return NewLanguage(append([]Language{full}, extensions...)...)
+}
+
+// TernaryOperator contains following Operator
+//
+//	?: a ? b : c returns b if bool a is true, otherwise b
+func TernaryOperator() Language {
+	return ternaryOperator
 }
 
 // Arithmetic contains base, plus(+), minus(-), divide(/), power(**), negative(-)
@@ -127,7 +133,7 @@ var full = NewLanguage(arithmetic, bitmask, text, propositionalLogic, ljson,
 		return a, nil
 	}),
 
-	PostfixOperator("?", parseIf),
+	ternaryOperator,
 
 	Function("date", func(arguments ...interface{}) (interface{}, error) {
 		if len(arguments) != 1 {
@@ -161,6 +167,8 @@ var full = NewLanguage(arithmetic, bitmask, text, propositionalLogic, ljson,
 		return nil, fmt.Errorf("date() could not parse %s", s)
 	}),
 )
+
+var ternaryOperator = PostfixOperator("?", parseIf)
 
 var ljson = NewLanguage(
 	PrefixExtension('[', parseJSONArray),
