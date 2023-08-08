@@ -17,6 +17,7 @@ type Language struct {
 	init            extension
 	def             extension
 	selector        func(Evaluables) Evaluable
+	createScanner   func() Scanner
 }
 
 // NewLanguage returns the union of given Languages as new Language.
@@ -46,6 +47,10 @@ func NewLanguage(bases ...Language) Language {
 	return l
 }
 
+func (l *Language) CreateScanner(cs func() Scanner) {
+	l.createScanner = cs
+}
+
 func newLanguage() Language {
 	return Language{
 		prefixes:        map[interface{}]extension{},
@@ -69,7 +74,7 @@ func (l Language) NewEvaluableWithContext(c context.Context, expression string) 
 	}
 	if err != nil {
 		pos := p.scanner.Pos()
-		return nil, fmt.Errorf("parsing error: %s - %d:%d %w", p.scanner.Position, pos.Line, pos.Column, err)
+		return nil, fmt.Errorf("parsing error: %s - %d:%d %w", p.scanner.GetPosition(), pos.Line, pos.Column, err)
 	}
 
 	return eval, nil
