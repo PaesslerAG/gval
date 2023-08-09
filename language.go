@@ -23,7 +23,11 @@ type Language struct {
 // NewLanguage returns the union of given Languages as new Language.
 func NewLanguage(bases ...Language) Language {
 	l := newLanguage()
+	var sc func() Scanner
 	for _, base := range bases {
+		if sc == nil && base.createScanner != nil {
+			sc = base.createScanner
+		}
 		for i, e := range base.prefixes {
 			l.prefixes[i] = e
 		}
@@ -43,6 +47,9 @@ func NewLanguage(bases ...Language) Language {
 		if base.selector != nil {
 			l.selector = base.selector
 		}
+	}
+	if sc != nil {
+		l.createScanner = sc
 	}
 	return l
 }
