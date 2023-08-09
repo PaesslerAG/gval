@@ -21,6 +21,8 @@ type Language struct {
 }
 
 // NewLanguage returns the union of given Languages as new Language.
+// The first language in the given list of base languages that has
+// a custom scanner determines the scanner of the returned language.
 func NewLanguage(bases ...Language) Language {
 	l := newLanguage()
 	var sc func() Scanner
@@ -54,6 +56,7 @@ func NewLanguage(bases ...Language) Language {
 	return l
 }
 
+// CreateScanner registers a custom scanner to this language.
 func (l *Language) CreateScanner(cs func() Scanner) {
 	l.createScanner = cs
 }
