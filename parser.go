@@ -10,28 +10,35 @@ import (
 
 // Parser parses expressions in a Language into an Evaluable
 type Parser struct {
-	scanner scanner.Scanner
+	scanner Scanner
 	Language
 	lastScan   rune
 	camouflage error
 }
 
 func newParser(expression string, l Language) *Parser {
-	sc := scanner.Scanner{}
+
+	var sc Scanner
+
+	if l.createScanner != nil {
+		sc = l.createScanner()
+	} else {
+		sc = &defaultScanner{}
+	}
 	sc.Init(strings.NewReader(expression))
-	sc.Error = func(*scanner.Scanner, string) {}
-	sc.Filename = expression + "\t"
+	sc.SetError(func(Scanner, string) {})
+	sc.SetFilename(expression + "\t")
 	p := &Parser{scanner: sc, Language: l}
 	p.resetScannerProperties()
 	return p
 }
 
 func (p *Parser) resetScannerProperties() {
-	p.scanner.Whitespace = scanner.GoWhitespace
-	p.scanner.Mode = scanner.GoTokens
-	p.scanner.IsIdentRune = func(r rune, pos int) bool {
+	p.scanner.SetWhitespace(scanner.GoWhitespace)
+	p.scanner.SetMode(scanner.GoTokens)
+	p.scanner.SetIsIdentRune(func(r rune, pos int) bool {
 		return unicode.IsLetter(r) || r == '_' || (pos > 0 && unicode.IsDigit(r))
-	}
+	})
 }
 
 // SetWhitespace sets the behavior of the whitespace matcher. The given
@@ -42,18 +49,18 @@ func (p *Parser) SetWhitespace(chars ...rune) {
 		mask |= 1 << char
 	}
 
-	p.scanner.Whitespace = mask
+	p.scanner.SetWhitespace(mask)
 }
 
 // SetMode sets the tokens that the underlying scanner will match.
 func (p *Parser) SetMode(mode uint) {
-	p.scanner.Mode = mode
+	p.scanner.SetMode(mode)
 }
 
 // SetIsIdentRuneFunc sets the function that matches ident characters in the
 // underlying scanner.
 func (p *Parser) SetIsIdentRuneFunc(fn func(ch rune, i int) bool) {
-	p.scanner.IsIdentRune = fn
+	p.scanner.SetIsIdentRune(fn)
 }
 
 // Scan reads the next token or Unicode character from source and returns it.
