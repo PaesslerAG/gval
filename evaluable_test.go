@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestEvaluable_IsConst(t *testing.T) {
@@ -197,6 +198,22 @@ func TestEvaluable_CustomSelector(t *testing.T) {
 				false,
 			},
 		}
+
+		booltests = []struct {
+			name    string
+			expr    string
+			params  interface{}
+			want    interface{}
+			wantErr bool
+		}{
+			{
+				"test method",
+				"s.IsZero",
+				map[string]interface{}{"s": time.Now()},
+				false,
+				false,
+			},
+		}
 	)
 
 	for _, tt := range tests {
@@ -206,6 +223,25 @@ func TestEvaluable_CustomSelector(t *testing.T) {
 				t.Errorf("Evaluable.Evaluate() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Evaluable.Evaluate() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+
+	for _, tt := range booltests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := lang.Evaluate(tt.expr, tt.params)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Evaluable.Evaluate() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			got, ok := convertToBool(got)
+			if !ok {
+				t.Errorf("Evaluable.Evaluate() error = nok, wantErr %v", tt.wantErr)
+				return
+			}
+
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Evaluable.Evaluate() = %v, want %v", got, tt.want)
 			}

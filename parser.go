@@ -39,7 +39,7 @@ func (p *Parser) resetScannerProperties() {
 func (p *Parser) SetWhitespace(chars ...rune) {
 	var mask uint64
 	for _, char := range chars {
-		mask |= 1 << char
+		mask |= 1 << uint(char)
 	}
 
 	p.scanner.Whitespace = mask
