@@ -116,6 +116,95 @@ func TestEvaluable_EvalFloat64(t *testing.T) {
 	}
 }
 
+
+type NullStruct struct {
+	Int *int
+}
+
+func TestEvaluable_Null(t *testing.T) {
+	var lang  = Base()
+
+	tests := []struct {
+			name    string
+			expr    string
+			params  interface{}
+			want    interface{}
+			wantErr bool
+		}{
+			{
+				"s == nil",
+				"s == nil",
+				map[string]interface{}{"s": nil},
+				true,
+				false,
+			},
+			{
+				"s != nil",
+				"s != nil",
+				map[string]interface{}{"s": nil},
+				false,
+				false,
+			},
+
+			{
+				"s1 == nil",
+				"s1 == nil",
+				map[string]interface{}{"s1": new(int)},
+				false,
+				false,
+			},
+			{
+				"s1 != nil",
+				"s1 != nil",
+				map[string]interface{}{"s1": new(int)},
+				true,
+				false,
+			},
+
+			{
+				"s.Int == nil",
+				"s.Int == nil",
+				map[string]interface{}{"s": &NullStruct{}},
+				true,
+				false,
+			},
+			{
+				"s.Int != nil",
+				"s.Int != nil",
+				map[string]interface{}{"s": &NullStruct{}},
+				false,
+				false,
+			},
+
+			{
+				"s1.Int == nil",
+				"s1.Int == nil",
+				map[string]interface{}{"s1": &NullStruct{Int: new(int)}},
+				false,
+				false,
+			},
+			{
+				"s1.Int != nil",
+				"s1.Int != nil",
+				map[string]interface{}{"s1": &NullStruct{Int: new(int)}},
+				true,
+				false,
+			},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := lang.Evaluate(tt.expr, tt.params)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Evaluable.Evaluate() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Evaluable.Evaluate() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 type testSelector struct {
 	str string
 	Map map[string]interface{}
