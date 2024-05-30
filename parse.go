@@ -316,9 +316,7 @@ func parseJSONObject(c context.Context, p *Parser) (Evaluable, error) {
 				return nil, err
 			}
 			if p.Scan() != ':' {
-				if err != nil {
-					return nil, p.Expected("object", ':')
-				}
+				return nil, p.Expected("object", ':')
 			}
 			value, err := p.ParseExpression(c)
 			if err != nil {
