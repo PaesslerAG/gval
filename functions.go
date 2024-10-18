@@ -12,7 +12,7 @@ func toFunc(f interface{}) function {
 	if f, ok := f.(func(arguments ...interface{}) (interface{}, error)); ok {
 		return function(func(ctx context.Context, arguments ...interface{}) (interface{}, error) {
 			var v interface{}
-			errCh := make(chan error)
+			errCh := make(chan error, 1)
 			go func() {
 				defer func() {
 					if recovered := recover(); recovered != nil {
@@ -28,6 +28,7 @@ func toFunc(f interface{}) function {
 			case <-ctx.Done():
 				return nil, ctx.Err()
 			case err := <-errCh:
+				close(errCh)
 				return v, err
 			}
 		})
@@ -40,7 +41,7 @@ func toFunc(f interface{}) function {
 	t := fun.Type()
 	return func(ctx context.Context, args ...interface{}) (interface{}, error) {
 		var v interface{}
-		errCh := make(chan error)
+		errCh := make(chan error, 1)
 		go func() {
 			defer func() {
 				if recovered := recover(); recovered != nil {
@@ -83,6 +84,7 @@ func toFunc(f interface{}) function {
 		case <-ctx.Done():
 			return nil, ctx.Err()
 		case err := <-errCh:
+			close(errCh)
 			return v, err
 		}
 	}
