@@ -117,7 +117,7 @@ func createCallArguments(ctx context.Context, t reflect.Type, args []interface{}
 		}
 		argVal := reflect.ValueOf(arg)
 		if arg == nil {
-			argVal = reflect.ValueOf(reflect.Interface)
+			argVal = reflect.Zero(reflect.TypeOf((*interface{})(nil)).Elem())
 		} else if !argVal.Type().AssignableTo(inType) {
 			return nil, fmt.Errorf("expected type %s for parameter %d but got %T",
 				inType.String(), i, arg)
