@@ -51,18 +51,18 @@ func (p *Parser) ParseSublanguage(c context.Context, l Language) (Evaluable, err
 		panic("can not ParseSublanguage() on camouflaged Parser")
 	}
 	curLang := p.Language
-	curWhitespace := p.scanner.Whitespace
-	curMode := p.scanner.Mode
-	curIsIdentRune := p.scanner.IsIdentRune
+	curWhitespace := p.scanner.GetWhitespace()
+	curMode := p.scanner.GetMode()
+	curIsIdentRune := p.scanner.GetIsIdentRune()
 
 	p.Language = l
 	p.resetScannerProperties()
 
 	defer func() {
 		p.Language = curLang
-		p.scanner.Whitespace = curWhitespace
-		p.scanner.Mode = curMode
-		p.scanner.IsIdentRune = curIsIdentRune
+		p.scanner.SetWhitespace(curWhitespace)
+		p.scanner.SetMode(curMode)
+		p.scanner.SetIsIdentRune(curIsIdentRune)
 	}()
 
 	return p.parse(c)
@@ -77,7 +77,7 @@ func (p *Parser) parse(c context.Context) (Evaluable, error) {
 }
 
 func parseString(c context.Context, p *Parser) (Evaluable, error) {
-	s, err := strconv.Unquote(p.TokenText())
+	s, err := p.scanner.Unquote(p.TokenText())
 	if err != nil {
 		return nil, fmt.Errorf("could not parse string: %w", err)
 	}
