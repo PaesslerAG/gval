@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 	"text/scanner"
 
 	"github.com/shopspring/decimal"
