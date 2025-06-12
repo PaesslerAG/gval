@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/PaesslerAG/gval"
-	"github.com/PaesslerAG/jsonpath"
+	"github.com/Nandagopi/gval"
+	"github.com/Nandagopi/jsonpath"
 )
 
 func Example() {
