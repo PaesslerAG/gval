@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/Nandagopi/gval"
-	"github.com/Nandagopi/jsonpath"
+	"github.com/PaesslerAG/jsonpath"
 )
 
 func Example() {
