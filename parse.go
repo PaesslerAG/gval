@@ -345,3 +345,11 @@ func parseJSONObject(c context.Context, p *Parser) (Evaluable, error) {
 		}
 	}
 }
+
+func startsWithOp(a, b string) (interface{}, error) {
+	return strings.HasPrefix(a, b), nil
+}
+
+func containsOp(a, b string) (interface{}, error) {
+	return strings.Contains(a, b), nil
+}
