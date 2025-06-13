@@ -354,3 +354,38 @@ func startsWithOp(a, b string) (interface{}, error) {
 func containsOp(a, b string) (interface{}, error) {
 	return strings.Contains(a, b), nil
 }
+
+func inNestedArray(a, b interface{}) (interface{}, error) {
+	inputArr, ok := a.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("expected type []interface{} for in operator but got %T", a)
+	}
+
+	argumentsArr, ok := b.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("expected type []interface{} for in operator but got %T", b)
+	}
+
+	if len(argumentsArr) < 2 {
+		return nil, fmt.Errorf("missing required fields. arguments len:%d", len(argumentsArr))
+	}
+
+	field := argumentsArr[0].(string)
+	checkVal := argumentsArr[1].(string)
+
+	for _, value := range inputArr {
+		subMap, ok := value.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("expected type []interface{} for in operator but got %T", value)
+		}
+
+		fieldVal, ok := subMap[field]
+		if !ok {
+			continue
+		}
+		if reflect.DeepEqual(checkVal, fieldVal) {
+			return true, nil
+		}
+	}
+	return false, nil
+}

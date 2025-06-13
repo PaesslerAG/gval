@@ -121,6 +121,7 @@ func Base() Language {
 var full = NewLanguage(arithmetic, bitmask, text, propositionalLogic, ljson,
 
 	InfixOperator("in", inArray),
+	InfixOperator("nfin", inNestedArray),
 
 	InfixShortCircuit("??", func(a interface{}) (interface{}, bool) {
 		v := reflect.ValueOf(a)
@@ -317,6 +318,7 @@ var base = NewLanguage(
 	Precedence("=~", 40),
 	Precedence("!~", 40),
 	Precedence("in", 40),
+	Precedence("nfin", 40),
 	Precedence("sw", 40),
 	Precedence("co", 40),
 
