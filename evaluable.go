@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"regexp"
 	"strconv"
-	"strings"
 )
 
 // Selector allows for custom variable selection from structs
@@ -67,6 +66,9 @@ func (e Evaluable) EvalString(c context.Context, parameter interface{}) (string,
 	if err != nil {
 		return "", err
 	}
+	if s, ok := o.(string); ok {
+		return s, nil
+	}
 	return fmt.Sprintf("%v", o), nil
 }
 
@@ -117,38 +119,39 @@ func (evs Evaluables) EvalStrings(c context.Context, parameter interface{}) ([]s
 
 func variable(path Evaluables) Evaluable {
 	return func(c context.Context, v interface{}) (interface{}, error) {
-		keys, err := path.EvalStrings(c, v)
-		if err != nil {
-			return nil, err
-		}
-		for i, k := range keys {
-			switch o := v.(type) {
+		v2 := v
+		for _, p := range path {
+			k, err := p.EvalString(c, v)
+			if err != nil {
+				return nil, err
+			}
+			switch o := v2.(type) {
 			case Selector:
-				v, err = o.SelectGVal(c, k)
+				v2, err = o.SelectGVal(c, k)
 				if err != nil {
 					return nil, fmt.Errorf("failed to select '%s' on %T: %w", k, o, err)
 				}
 				continue
 			case map[interface{}]interface{}:
-				v = o[k]
+				v2 = o[k]
 				continue
 			case map[string]interface{}:
-				v = o[k]
+				v2 = o[k]
 				continue
 			case []interface{}:
 				if i, err := strconv.Atoi(k); err == nil && i >= 0 && len(o) > i {
-					v = o[i]
+					v2 = o[i]
 					continue
 				}
 			default:
 				var ok bool
-				v, ok = reflectSelect(k, o)
+				v2, ok = reflectSelect(k, o)
 				if !ok {
-					return nil, fmt.Errorf("unknown parameter %s", strings.Join(keys[:i+1], "."))
+					return nil, fmt.Errorf("unknown parameter '%s' on %T", k, o)
 				}
 			}
 		}
-		return v, nil
+		return v2, nil
 	}
 }
 
