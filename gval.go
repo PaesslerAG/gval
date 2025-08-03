@@ -247,6 +247,8 @@ var text = NewLanguage(
 	InfixTextOperator(">=", func(a, b string) (interface{}, error) { return a >= b, nil }),
 	InfixTextOperator("sw", startsWithOp),
 	InfixTextOperator("co", containsOp),
+	InfixTextOperator("ew", endsWithOp),
+	InfixTextOperator("mw", matchOp),
 
 	InfixEvalOperator("=~", regEx),
 	InfixEvalOperator("!~", notRegEx),
@@ -319,6 +321,8 @@ var base = NewLanguage(
 	Precedence("in", 40),
 	Precedence("sw", 40),
 	Precedence("co", 40),
+	Precedence("ew", 40),
+	Precedence("mw", 40),
 
 	Precedence("^", 60),
 	Precedence("&", 60),

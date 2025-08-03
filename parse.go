@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"text/scanner"
+	"regexp"
 
 	"github.com/shopspring/decimal"
 )
@@ -353,4 +354,16 @@ func startsWithOp(a, b string) (interface{}, error) {
 
 func containsOp(a, b string) (interface{}, error) {
 	return strings.Contains(a, b), nil
+}
+
+func endsWithOp(a, b string) (interface{}, error) {
+	return strings.HasSuffix(a, b), nil
+}
+
+func matchOp(a, b string) (interface{}, error) {
+	matched, err := regexp.MatchString(b, a)
+	if err != nil {
+		return nil, err
+	}
+	return matched, nil
 }
