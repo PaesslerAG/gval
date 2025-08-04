@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/Nandagopi/gval"
-	"github.com/PaesslerAG/jsonpath"
 )
 
 func Example() {
@@ -342,23 +341,6 @@ func ExampleEvaluable_EvalBool() {
 	// yeah
 }
 
-func ExampleEvaluate_jsonpath() {
-
-	value, err := gval.Evaluate(`$["response-time"]`,
-		map[string]interface{}{
-			"response-time": 100,
-		},
-		jsonpath.Language(),
-	)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Print(value)
-
-	// Output:
-	// 100
-}
 
 func ExampleLanguage() {
 	lang := gval.NewLanguage(gval.JSON(), gval.Arithmetic(),
