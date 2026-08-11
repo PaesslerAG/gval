@@ -10,13 +10,6 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-var maxParseDepth uint64 = 1024
-
-// SetMaxParseDepth sets the max depth for the parsing recursion
-func SetMaxParseDepth(depth uint64) {
-	maxParseDepth = depth
-}
-
 // ParseExpression scans an expression into an Evaluable.
 func (p *Parser) ParseExpression(c context.Context) (eval Evaluable, err error) {
 	p.parseDepth++
@@ -24,7 +17,7 @@ func (p *Parser) ParseExpression(c context.Context) (eval Evaluable, err error) 
 		p.parseDepth--
 	}()
 
-	if p.parseDepth > maxParseDepth {
+	if p.maxParseDepth != nil && p.parseDepth > *p.maxParseDepth {
 		return nil, fmt.Errorf("maximum parse depth exceeded")
 	}
 
