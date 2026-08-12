@@ -12,6 +12,15 @@ import (
 
 // ParseExpression scans an expression into an Evaluable.
 func (p *Parser) ParseExpression(c context.Context) (eval Evaluable, err error) {
+	p.parseDepth++
+	defer func() {
+		p.parseDepth--
+	}()
+
+	if p.maxParseDepth != nil && p.parseDepth > *p.maxParseDepth {
+		return nil, fmt.Errorf("maximum parse depth exceeded")
+	}
+
 	stack := stageStack{}
 	for {
 		eval, err = p.ParseNextExpression(c)

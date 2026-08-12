@@ -14,6 +14,7 @@ type Parser struct {
 	Language
 	lastScan   rune
 	camouflage error
+	parseDepth  uint64
 }
 
 func newParser(expression string, l Language) *Parser {

@@ -17,6 +17,7 @@ type Language struct {
 	init            extension
 	def             extension
 	selector        func(Evaluables) Evaluable
+	maxParseDepth   *uint64
 }
 
 // NewLanguage returns the union of given Languages as new Language.
@@ -41,6 +42,9 @@ func NewLanguage(bases ...Language) Language {
 		}
 		if base.selector != nil {
 			l.selector = base.selector
+		}
+		if base.maxParseDepth != nil {
+			l.maxParseDepth = base.maxParseDepth
 		}
 	}
 	return l
@@ -144,6 +148,14 @@ func PrefixExtension(r rune, ext func(context.Context, *Parser) (Evaluable, erro
 func Init(ext func(context.Context, *Parser) (Evaluable, error)) Language {
 	l := newLanguage()
 	l.init = ext
+	return l
+}
+
+// MaxParseDepth returns a Language with the maximum parsing recursion depth.
+// A nil maxParseDepth means that parsing has no recursion depth limit.
+func MaxParseDepth(depth uint64) Language {
+	l := newLanguage()
+	l.maxParseDepth = &depth
 	return l
 }
 
