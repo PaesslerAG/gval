@@ -315,6 +315,14 @@ func TestModifierTyping(test *testing.T) {
 			wantErr:    "function should always fail",
 		},
 		{
+			name:       "Parameter func with error-only result returns error",
+			expression: "check()",
+			parameter: map[string]interface{}{
+				"check": func() error { return errors.New("validation failed") },
+			},
+			wantErr: "validation failed",
+		},
+		{
 			name:       "Too few arguments to parameter call",
 			expression: "foo.FuncArgStr()",
 			parameter:  fooFailureParameters,
