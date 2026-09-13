@@ -446,6 +446,15 @@ func TestParameterized(t *testing.T) {
 			},
 			{
 
+				name:       "Parameter function call with error-only result",
+				expression: `check()`,
+				parameter: map[string]interface{}{
+					"check": func() error { return nil },
+				},
+				want: nil,
+			},
+			{
+
 				name:       "Nested parameter function call",
 				expression: `foo.Nested.Dunk("boop")`,
 				parameter:  map[string]interface{}{"foo": foo},
