@@ -165,6 +165,11 @@ func TestParsingFailure(t *testing.T) {
 				expression: "0 + ,",
 				wantErr:    `unexpected "," while scanning extensions`,
 			},
+			{
+				name:       "Invalid json key:value structure",
+				expression: `{"a"=1}`,
+				wantErr:    `unexpected "=" while scanning object expected ":"`,
+			},
 		},
 		t,
 	)
