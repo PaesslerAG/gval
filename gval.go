@@ -279,6 +279,33 @@ var ident = NewLanguage(
 	PrefixMetaPrefix(scanner.Ident, parseIdent),
 )
 
+
+func isNilValue(v interface{}) bool {
+	rv := reflect.ValueOf(v)
+	if rv.Kind() == reflect.Interface {
+		rv = rv.Elem()
+	}
+	if rv.Kind() != reflect.Ptr &&
+		rv.Kind() != reflect.Map &&
+		rv.Kind() != reflect.Slice {
+		return false
+	}
+	return rv.IsNil()
+}
+
+func isNotNilValue(v interface{}) bool {
+	rv := reflect.ValueOf(v)
+	if rv.Kind() == reflect.Interface {
+		rv = rv.Elem()
+	}
+	if rv.Kind() != reflect.Ptr &&
+		rv.Kind() != reflect.Map &&
+		rv.Kind() != reflect.Slice {
+		return true
+	}
+	return !rv.IsNil()
+}
+
 var base = NewLanguage(
 	PrefixExtension(scanner.Int, parseNumber),
 	PrefixExtension(scanner.Float, parseNumber),
@@ -297,8 +324,37 @@ var base = NewLanguage(
 	Constant("true", true),
 	Constant("false", false),
 
-	InfixOperator("==", func(a, b interface{}) (interface{}, error) { return reflect.DeepEqual(a, b), nil }),
-	InfixOperator("!=", func(a, b interface{}) (interface{}, error) { return !reflect.DeepEqual(a, b), nil }),
+	Constant("nil", nil),
+	Constant("null", nil),
+
+	InfixOperator("==", func(a, b interface{}) (interface{}, error) {
+		if a == nil {
+			if b == nil {
+				return true, nil
+			}
+			return isNilValue(b), nil
+		}
+
+		if b == nil {
+			return isNilValue(a), nil
+		}
+
+	  return reflect.DeepEqual(a, b), nil
+	}),
+	InfixOperator("!=", func(a, b interface{}) (interface{}, error) {
+		if a == nil {
+			if b == nil {
+				return false, nil
+			}
+			return isNotNilValue(b), nil
+		}
+		if b == nil {
+			return isNotNilValue(a), nil
+		}
+
+		return !reflect.DeepEqual(a, b), nil
+	}),
+
 	parentheses,
 
 	Precedence("??", 0),

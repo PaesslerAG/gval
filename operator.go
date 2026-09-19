@@ -181,6 +181,9 @@ func convertToBool(o interface{}) (bool, bool) {
 func getBoolOpFunc(o func(a, b bool) (interface{}, error), f opFunc, typeConversion bool) opFunc {
 	if typeConversion {
 		return func(a, b interface{}) (interface{}, error) {
+			if a == nil || b == nil {
+				return f(a, b)
+			}
 			x, k := convertToBool(a)
 			y, l := convertToBool(b)
 			if k && l {
