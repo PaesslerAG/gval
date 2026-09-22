@@ -84,7 +84,7 @@ The default language is in serveral sub languages like text, arithmetic or propo
 - Logical ops: `||` `&&`
 - Numeric constants, as 64-bit floating point (`12345.678`)
 - String constants (double quotes: `"foobar"`)
-- Date function 'Date(x)', using any permutation of RFC3339, ISO8601, ruby date, or unix date
+- Date function 'date(x)', using any permutation of RFC3339, ISO8601, ruby date, or unix date
 - Boolean constants: `true` `false`
 - Parentheses to control order of evaluation `(` `)`
 - Json Arrays : `[1, 2, "foo"]`

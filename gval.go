@@ -33,9 +33,9 @@ func EvaluateWithContext(c context.Context, expression string, parameter interfa
 // Full is the union of Arithmetic, Bitmask, Text, PropositionalLogic, TernaryOperator, and Json
 //
 //	Operator in: a in b is true iff value a is an element of array b
-//	Operator ??: a ?? b returns a if a is not false or nil, otherwise n
+//	Operator ??: a ?? b returns b if a is nil or the zero value of its type, otherwise a
 //
-// Function Date: Date(a) parses string a. a must match RFC3339, ISO8601, ruby date, or unix date
+// Function date: date(a) parses string a. a must match RFC3339, ISO8601, ruby date, or unix date
 func Full(extensions ...Language) Language {
 	if len(extensions) == 0 {
 		return full
@@ -45,7 +45,7 @@ func Full(extensions ...Language) Language {
 
 // TernaryOperator contains following Operator
 //
-//	?: a ? b : c returns b if bool a is true, otherwise b
+//	?: a ? b : c returns c if a is nil or the zero value of its type, otherwise b
 func TernaryOperator() Language {
 	return ternaryOperator
 }
