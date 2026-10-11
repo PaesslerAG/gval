@@ -15,6 +15,8 @@ type Parser struct {
 	lastScan   rune
 	camouflage error
 	parseDepth  uint64
+	mode       uint
+	tokenText  string
 }
 
 func newParser(expression string, l Language) *Parser {
@@ -29,7 +31,8 @@ func newParser(expression string, l Language) *Parser {
 
 func (p *Parser) resetScannerProperties() {
 	p.scanner.Whitespace = scanner.GoWhitespace
-	p.scanner.Mode = scanner.GoTokens
+	p.mode = scanner.GoTokens
+	p.scanner.Mode = scanner.GoTokens &^ scanner.ScanStrings
 	p.scanner.IsIdentRune = func(r rune, pos int) bool {
 		return unicode.IsLetter(r) || r == '_' || (pos > 0 && unicode.IsDigit(r))
 	}
@@ -48,7 +51,8 @@ func (p *Parser) SetWhitespace(chars ...rune) {
 
 // SetMode sets the tokens that the underlying scanner will match.
 func (p *Parser) SetMode(mode uint) {
-	p.scanner.Mode = mode
+	p.mode = mode
+	p.scanner.Mode = mode &^ scanner.ScanStrings
 }
 
 // SetIsIdentRuneFunc sets the function that matches ident characters in the
@@ -66,7 +70,14 @@ func (p *Parser) Scan() rune {
 		return p.lastScan
 	}
 	p.camouflage = nil
-	p.lastScan = p.scanner.Scan()
+	p.tokenText = ""
+	scan := p.scanner.Scan()
+	if scan == '"' && p.mode&scanner.ScanStrings != 0 {
+		p.lastScan = scanner.String
+		p.tokenText = p.scanStringLiteral('"')
+		return p.lastScan
+	}
+	p.lastScan = scan
 	return p.lastScan
 }
 
@@ -111,6 +122,9 @@ func (p *Parser) Next() rune {
 // TokenText returns the string corresponding to the most recently scanned token.
 // Valid after calling Scan().
 func (p *Parser) TokenText() string {
+	if p.tokenText != "" {
+		return p.tokenText
+	}
 	return p.scanner.TokenText()
 }
 
