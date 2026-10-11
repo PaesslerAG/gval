@@ -306,6 +306,16 @@ func TestNoParameter(t *testing.T) {
 				want:       true,
 			},
 			{
+				name:       "Multiline string with literal line feed",
+				expression: "\"hello\nworld\"",
+				want:       "hello\nworld",
+			},
+			{
+				name:       "Multiline string equality with escaped newline",
+				expression: "\"hello\nworld\" == \"hello\\nworld\"",
+				want:       true,
+			},
+			{
 				name:       "Lexicographic LTE",
 				expression: `"ab" <= "abc"`,
 				want:       true,

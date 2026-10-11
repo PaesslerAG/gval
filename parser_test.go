@@ -122,6 +122,22 @@ func TestParser_Scan(t *testing.T) {
 			wantScan:  'b',
 			wantToken: "b",
 		},
+		{
+			name:  "scan multiline string",
+			input: "\"hello\nworld\"",
+			do:    func(p *Parser) {},
+			wantScan:  scanner.String,
+			wantToken: "\"hello\nworld\"",
+		},
+		{
+			name:  "do not scan strings",
+			input: "\"hello\nworld\"",
+			do: func(p *Parser) {
+				p.SetMode(scanner.GoTokens ^ scanner.ScanStrings)
+			},
+			wantScan:  '"',
+			wantToken: "\"",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
