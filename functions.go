@@ -117,7 +117,12 @@ func createCallArguments(ctx context.Context, t reflect.Type, args []interface{}
 		}
 		argVal := reflect.ValueOf(arg)
 		if arg == nil {
-			argVal = reflect.Zero(reflect.TypeOf((*interface{})(nil)).Elem())
+			switch inType.Kind() {
+			case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Ptr, reflect.Slice:
+				argVal = reflect.Zero(inType)
+			default:
+				return nil, fmt.Errorf("cannot use nil for parameter %d of type %s", i, inType)
+			}
 		} else if !argVal.Type().AssignableTo(inType) {
 			return nil, fmt.Errorf("expected type %s for parameter %d but got %T",
 				inType.String(), i, arg)

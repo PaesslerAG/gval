@@ -138,6 +138,24 @@ func Test_toFunc(t *testing.T) {
 			arguments: []interface{}{nil},
 			want:      true,
 		},
+		{
+			name:      "nil pointer arg",
+			function:  func(a *int) bool { return a == nil },
+			arguments: []interface{}{nil},
+			want:      true,
+		},
+		{
+			name:      "nil slice arg",
+			function:  func(a []string) bool { return a == nil },
+			arguments: []interface{}{nil},
+			want:      true,
+		},
+		{
+			name:       "nil scalar arg",
+			function:   func(a int) {},
+			arguments:  []interface{}{nil},
+			wantAnyErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
