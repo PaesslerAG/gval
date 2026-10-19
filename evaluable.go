@@ -161,12 +161,12 @@ func reflectSelect(key string, value interface{}) (selection interface{}, ok boo
 
 	switch vvElem.Kind() {
 	case reflect.Map:
-		mapKey, ok := reflectConvertTo(vv.Type().Key().Kind(), key)
+		mapKey, ok := reflectConvertTo(vvElem.Type().Key().Kind(), key)
 		if !ok {
 			return nil, false
 		}
 
-		vvElem = vv.MapIndex(reflect.ValueOf(mapKey))
+		vvElem = vvElem.MapIndex(reflect.ValueOf(mapKey))
 		vvElem = resolvePotentialPointer(vvElem)
 
 		if vvElem.IsValid() {
@@ -180,8 +180,8 @@ func reflectSelect(key string, value interface{}) (selection interface{}, ok boo
 		}
 
 	case reflect.Slice:
-		if i, err := strconv.Atoi(key); err == nil && i >= 0 && vv.Len() > i {
-			vvElem = resolvePotentialPointer(vv.Index(i))
+		if i, err := strconv.Atoi(key); err == nil && i >= 0 && vvElem.Len() > i {
+			vvElem = resolvePotentialPointer(vvElem.Index(i))
 			return vvElem.Interface(), true
 		}
 
