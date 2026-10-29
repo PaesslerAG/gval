@@ -143,6 +143,7 @@ func variable(path Evaluables) Evaluable {
 					v2 = o[i]
 					continue
 				}
+				return nil, fmt.Errorf("unknown parameter '%s' on %T", k, o)
 			default:
 				var ok bool
 				v2, ok = reflectSelect(k, o)
