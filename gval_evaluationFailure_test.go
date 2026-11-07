@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+
+	"github.com/shopspring/decimal"
 )
 
 func TestModifierTyping(test *testing.T) {
@@ -401,4 +403,97 @@ func TestModifierTyping(test *testing.T) {
 	}
 
 	testEvaluate(evaluationTests, test)
+}
+
+func TestDecimalArithmeticZeroDivisor(test *testing.T) {
+	divisionByZero := "division by zero"
+	zeroDivisorParameter := map[string]interface{}{"x": 1.5, "zero": 0, "half": -0.5}
+	testEvaluate([]evaluationTest{
+		{
+			name:       "DIVIDE by zero",
+			expression: "1 / 0",
+			extension:  decimalArithmetic,
+			wantErr:    divisionByZero,
+		},
+		{
+			name:       "DIVIDE by zero parameter",
+			expression: "x / zero",
+			extension:  decimalArithmetic,
+			parameter:  zeroDivisorParameter,
+			wantErr:    divisionByZero,
+		},
+		{
+			name:       "MODULUS by zero",
+			expression: "1 % 0",
+			extension:  decimalArithmetic,
+			wantErr:    divisionByZero,
+		},
+		{
+			name:       "MODULUS by fractional zero",
+			expression: "1.5 % 0.0",
+			extension:  decimalArithmetic,
+			wantErr:    divisionByZero,
+		},
+		{
+			name:       "MODULUS by zero parameter",
+			expression: "x % zero",
+			extension:  decimalArithmetic,
+			parameter:  zeroDivisorParameter,
+			wantErr:    divisionByZero,
+		},
+		{
+			name:       "EXPONENT zero to minus one",
+			expression: "0 ** (0 - 1)",
+			extension:  decimalArithmetic,
+			wantErr:    divisionByZero,
+		},
+		{
+			name:       "EXPONENT zero to minus two",
+			expression: "zero ** (0 - 2)",
+			extension:  decimalArithmetic,
+			parameter:  zeroDivisorParameter,
+			wantErr:    divisionByZero,
+		},
+		{
+			name:       "EXPONENT zero to fractional negative",
+			expression: "0 ** (0 - 0.5)",
+			extension:  decimalArithmetic,
+			wantErr:    divisionByZero,
+		},
+		{
+			name:       "EXPONENT zero to fractional negative parameter",
+			expression: "zero ** half",
+			extension:  decimalArithmetic,
+			parameter:  zeroDivisorParameter,
+			wantErr:    divisionByZero,
+		},
+		{
+			name:         "DIVIDE zero by number",
+			expression:   "0 / 4",
+			extension:    decimalArithmetic,
+			want:         decimal.Zero,
+			equalityFunc: decimalEqualityFunc,
+		},
+		{
+			name:         "MODULUS zero by number",
+			expression:   "0 % 4",
+			extension:    decimalArithmetic,
+			want:         decimal.Zero,
+			equalityFunc: decimalEqualityFunc,
+		},
+		{
+			name:         "EXPONENT number to minus one",
+			expression:   "2 ** (0 - 1)",
+			extension:    decimalArithmetic,
+			want:         decimal.NewFromFloat(0.5),
+			equalityFunc: decimalEqualityFunc,
+		},
+		{
+			name:         "EXPONENT zero to zero",
+			expression:   "0 ** 0",
+			extension:    decimalArithmetic,
+			want:         decimal.NewFromInt(1),
+			equalityFunc: decimalEqualityFunc,
+		},
+	}, test)
 }

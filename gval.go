@@ -7,6 +7,7 @@ package gval
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"reflect"
@@ -67,6 +68,7 @@ func Arithmetic() Language {
 // and are used to calculate money/decimal rather than floating point calculations.
 // Called with unfitting input, they try to convert the input to decimal.Decimal.
 // They can parse strings and convert any type of int or float.
+// Division or modulo by zero, and zero to a negative power, return an error.
 func DecimalArithmetic() Language {
 	return decimalArithmetic
 }
@@ -194,13 +196,31 @@ var arithmetic = NewLanguage(
 	base,
 )
 
+var errDecimalDivisionByZero = errors.New("division by zero")
+
 var decimalArithmetic = NewLanguage(
 	InfixDecimalOperator("+", func(a, b decimal.Decimal) (interface{}, error) { return a.Add(b), nil }),
 	InfixDecimalOperator("-", func(a, b decimal.Decimal) (interface{}, error) { return a.Sub(b), nil }),
 	InfixDecimalOperator("*", func(a, b decimal.Decimal) (interface{}, error) { return a.Mul(b), nil }),
-	InfixDecimalOperator("/", func(a, b decimal.Decimal) (interface{}, error) { return a.Div(b), nil }),
-	InfixDecimalOperator("%", func(a, b decimal.Decimal) (interface{}, error) { return a.Mod(b), nil }),
-	InfixDecimalOperator("**", func(a, b decimal.Decimal) (interface{}, error) { return a.Pow(b), nil }),
+	InfixDecimalOperator("/", func(a, b decimal.Decimal) (interface{}, error) {
+		if b.IsZero() {
+			return nil, errDecimalDivisionByZero
+		}
+		return a.Div(b), nil
+	}),
+	InfixDecimalOperator("%", func(a, b decimal.Decimal) (interface{}, error) {
+		if b.IsZero() {
+			return nil, errDecimalDivisionByZero
+		}
+		return a.Mod(b), nil
+	}),
+	InfixDecimalOperator("**", func(a, b decimal.Decimal) (interface{}, error) {
+		// zero to a negative power is undefined, and Pow divides by zero for exponents of -1 or less
+		if a.IsZero() && b.IsNegative() {
+			return nil, errDecimalDivisionByZero
+		}
+		return a.Pow(b), nil
+	}),
 
 	InfixDecimalOperator(">", func(a, b decimal.Decimal) (interface{}, error) { return a.GreaterThan(b), nil }),
 	InfixDecimalOperator(">=", func(a, b decimal.Decimal) (interface{}, error) { return a.GreaterThanOrEqual(b), nil }),
