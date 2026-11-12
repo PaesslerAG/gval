@@ -644,6 +644,18 @@ func TestParameterized(t *testing.T) {
 				want: 2.,
 			},
 			{
+				name:       "Decimal division by zero is an error",
+				expression: "1 / 0",
+				extension:  decimalArithmetic,
+				wantErr:    "division by zero",
+			},
+			{
+				name:       "Decimal modulo by zero is an error",
+				expression: "1 % 0",
+				extension:  decimalArithmetic,
+				wantErr:    "modulo by zero",
+			},
+			{
 				name:       "Decimal math doesn't experience rounding error",
 				expression: "(x * 12.146) - y",
 				extension:  decimalArithmetic,
