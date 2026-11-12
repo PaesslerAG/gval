@@ -198,8 +198,18 @@ var decimalArithmetic = NewLanguage(
 	InfixDecimalOperator("+", func(a, b decimal.Decimal) (interface{}, error) { return a.Add(b), nil }),
 	InfixDecimalOperator("-", func(a, b decimal.Decimal) (interface{}, error) { return a.Sub(b), nil }),
 	InfixDecimalOperator("*", func(a, b decimal.Decimal) (interface{}, error) { return a.Mul(b), nil }),
-	InfixDecimalOperator("/", func(a, b decimal.Decimal) (interface{}, error) { return a.Div(b), nil }),
-	InfixDecimalOperator("%", func(a, b decimal.Decimal) (interface{}, error) { return a.Mod(b), nil }),
+	InfixDecimalOperator("/", func(a, b decimal.Decimal) (interface{}, error) {
+		if b.IsZero() {
+			return nil, fmt.Errorf("division by zero")
+		}
+		return a.Div(b), nil
+	}),
+	InfixDecimalOperator("%", func(a, b decimal.Decimal) (interface{}, error) {
+		if b.IsZero() {
+			return nil, fmt.Errorf("modulo by zero")
+		}
+		return a.Mod(b), nil
+	}),
 	InfixDecimalOperator("**", func(a, b decimal.Decimal) (interface{}, error) { return a.Pow(b), nil }),
 
 	InfixDecimalOperator(">", func(a, b decimal.Decimal) (interface{}, error) { return a.GreaterThan(b), nil }),
