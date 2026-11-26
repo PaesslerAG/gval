@@ -655,6 +655,28 @@ func TestParameterized(t *testing.T) {
 				equalityFunc: decimalEqualityFunc,
 			},
 			{
+				name:       "Decimal division by zero returns error",
+				expression: "x / y",
+				extension:  decimalArithmetic,
+				parameter: map[string]interface{}{
+					"x": 1,
+					"y": 0,
+				},
+				wantErr: "decimal division by 0",
+			},
+			{
+				name:       "Decimal modulo by zero returns error",
+				expression: "1 % 0",
+				extension:  decimalArithmetic,
+				wantErr:    "decimal division by 0",
+			},
+			{
+				name:       "Decimal power with zero base and negative exponent returns error",
+				expression: "0 ** (0 - 1)",
+				extension:  decimalArithmetic,
+				wantErr:    "decimal division by 0",
+			},
+			{
 				name:       "Decimal logical operators fractional difference",
 				expression: "((x * 12.146) - y) > 156.824999999",
 				extension:  decimalArithmetic,

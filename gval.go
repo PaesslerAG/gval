@@ -198,9 +198,24 @@ var decimalArithmetic = NewLanguage(
 	InfixDecimalOperator("+", func(a, b decimal.Decimal) (interface{}, error) { return a.Add(b), nil }),
 	InfixDecimalOperator("-", func(a, b decimal.Decimal) (interface{}, error) { return a.Sub(b), nil }),
 	InfixDecimalOperator("*", func(a, b decimal.Decimal) (interface{}, error) { return a.Mul(b), nil }),
-	InfixDecimalOperator("/", func(a, b decimal.Decimal) (interface{}, error) { return a.Div(b), nil }),
-	InfixDecimalOperator("%", func(a, b decimal.Decimal) (interface{}, error) { return a.Mod(b), nil }),
-	InfixDecimalOperator("**", func(a, b decimal.Decimal) (interface{}, error) { return a.Pow(b), nil }),
+	InfixDecimalOperator("/", func(a, b decimal.Decimal) (interface{}, error) {
+		if b.IsZero() {
+			return nil, fmt.Errorf("decimal division by 0")
+		}
+		return a.Div(b), nil
+	}),
+	InfixDecimalOperator("%", func(a, b decimal.Decimal) (interface{}, error) {
+		if b.IsZero() {
+			return nil, fmt.Errorf("decimal division by 0")
+		}
+		return a.Mod(b), nil
+	}),
+	InfixDecimalOperator("**", func(a, b decimal.Decimal) (interface{}, error) {
+		if a.IsZero() && b.Sign() < 0 {
+			return nil, fmt.Errorf("decimal division by 0")
+		}
+		return a.Pow(b), nil
+	}),
 
 	InfixDecimalOperator(">", func(a, b decimal.Decimal) (interface{}, error) { return a.GreaterThan(b), nil }),
 	InfixDecimalOperator(">=", func(a, b decimal.Decimal) (interface{}, error) { return a.GreaterThanOrEqual(b), nil }),
